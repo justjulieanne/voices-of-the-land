@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Voices of the Land — Dictionary (Cree)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--muted:#6b5847;}
+body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:20px;}
+.wrap{max-width:900px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.05);}
+h1{color:var(--accent);margin:0 0 8px;}
+.entry{border-bottom:1px dashed #e7ded4;padding:12px 0;}
+.word{font-size:18px;font-weight:700;color:#3f2b20;}
+.meta{font-size:13px;color:#7a6a5f;margin-top:6px;}
+audio{margin-top:8px;width:100%;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Voices of the Land — Public Dictionary (Verified)</h1>
+<p class="meta">Compiled entries verified by community Elders. If you submitted a word, check with Elders for publication status.</p>
+<div id="list">Loading...</div>
+</div>
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyhWppcmIoIEuqe6YRmEyLRG_5Lo2C65XmB2JDKCc8XIfwGHx9XyqtQLDxFQL0b2Lcj/exec?cmd=listVerified";
+async function load(){try{const resp=await fetch(WEB_APP_URL);const j=await resp.json();const container=document.getElementById('list');container.innerHTML="";if(!j.entries||j.entries.length===0){container.innerHTML="<p>No verified entries yet.</p>";return;}j.entries.forEach(e=>{const div=document.createElement('div');div.className="entry";div.innerHTML=`<div class="word">${e.indigenousText}</div><div style="margin-top:6px">${e.englishText}</div><div class="meta">Community: ${e.community||"Cree"} • Submitted by: ${e.submitter||"Anonymous"} • ${new Date(e.timestamp).toLocaleString()}</div>${e.audioUrl?`<div style="margin-top:8px"><audio controls src="${e.audioUrl}"></audio></div>`:""}${e.notes?`<div style="margin-top:8px;font-size:14px">Notes: ${e.notes}</div>`:""}`;container.appendChild(div);});}catch(err){document.getElementById('list').textContent="Error loading dictionary: "+err.toString();}}load();
+</script>
+</body>
+</html>

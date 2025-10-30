@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Voices of the Land — Submit (Cree)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root{
+  --bg:#f5efe6; --card:#fff9f2; --accent:#8a4b2a; --accent-2:#b33a2a; --muted:#6b5847;
+}
+body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:22px;}
+.wrap{max-width:720px;margin:0 auto;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.06);}
+h1{color:var(--accent);margin:0 0 6px;font-size:20px}
+label{display:block;margin-top:12px;font-weight:600}
+input[type=text], textarea, select {width:100%;padding:10px;border:1px solid #e6dcd1;border-radius:8px;margin-top:6px;}
+.controls{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+button{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
+button.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.muted{color:#7a6a5f;font-size:13px}
+.consent{margin-top:10px;display:flex;align-items:center;gap:8px}
+audio{margin-top:8px;width:100%}
+.result{margin-top:12px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Voices of the Land — Submit (Cree)</h1>
+<p class="muted">Share a word or phrase. Submissions will be reviewed by community Elders before being published.</p>
+<label>Community
+<select id="community"><option value="Cree">Cree</option></select></label>
+<label>Submitter name (optional)<input id="submitter" type="text" placeholder="Your name (or leave blank for anonymous)" /></label>
+<label>Indigenous text (word or phrase)<input id="indigenousText" type="text" placeholder="Enter word or phrase in Cree" /></label>
+<label>English translation<input id="englishText" type="text" placeholder="Enter English translation" /></label>
+<label>Notes (usage, dialect notes, context)<textarea id="notes" rows="3" placeholder="Optional notes for Elders or learners"></textarea></label>
+<div style="margin-top:12px;">
+<p class="muted">Record audio (optional)</p>
+<div class="controls">
+<button id="startBtn">Start Recording</button>
+<button id="stopBtn" disabled>Stop</button>
+<button id="playBtn" class="secondary" disabled>Play</button>
+</div>
+<div id="recStatus" class="muted" style="margin-top:6px"></div>
+<audio id="player" controls style="display:none"></audio>
+</div>
+<div class="consent">
+<input type="checkbox" id="consent" />
+<label for="consent">I confirm I have permission to share this word, and understand it may be made public after Elder verification.</label>
+</div>
+<div style="margin-top:14px;">
+<button id="submitBtn">Submit</button>
+<button id="clearBtn" class="secondary">Clear</button>
+</div>
+<div id="result" class="result"></div>
+</div>
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyhWppcmIoIEuqe6YRmEyLRG_5Lo2C65XmB2JDKCc8XIfwGHx9XyqtQLDxFQL0b2Lcj/exec";
+let mediaRecorder, recordedChunks = [], audioMime = "audio/webm";
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const playBtn = document.getElementById('playBtn');
+const player = document.getElementById('player');
+const recStatus = document.getElementById('recStatus');
+startBtn.onclick = async () => {
+  recordedChunks = [];
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: audioMime });
+      const url = URL.createObjectURL(blob);
+      player.src = url;
+      player.style.display = "block";
+      playBtn.disabled = false;
+      recStatus.textContent = `Recorded ${Math.round(blob.size/1000)} KB`;
+      window._latestBlob = blob;
+    };
+    mediaRecorder.start();
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    recStatus.textContent = "Recording...";
+  } catch (err) { alert("Microphone access is required to record audio."); }
+};
+stopBtn.onclick = () => { if(mediaRecorder && mediaRecorder.state==="recording") mediaRecorder.stop(); startBtn.disabled=false; stopBtn.disabled=true; };
+playBtn.onclick = () => { if(player.src) player.play(); };
+document.getElementById('clearBtn').onclick = () => {
+document.getElementById('submitter').value="";document.getElementById('indigenousText').value="";
+document.getElementById('englishText').value="";document.getElementById('notes').value="";
+player.src="";player.style.display="none";window._latestBlob=null;recStatus.textContent="";
+document.getElementById('consent').checked=false;
+};
+document.getElementById('submitBtn').onclick = async () => {
+const submitter=document.getElementById('submitter').value.trim();
+const community=document.getElementById('community').value;
+const indigenousText=document.getElementById('indigenousText').value.trim();
+const englishText=document.getElementById('englishText').value.trim();
+const notes=document.getElementById('notes').value.trim();
+const consent=document.getElementById('consent').checked;
+if(!indigenousText||!englishText){alert("Please provide both Indigenous text and English translation.");return;}
+if(!consent){alert("Please check the consent box before submitting.");return;}
+let audioBase64=null;if(window._latestBlob){const arrBuffer=await window._latestBlob.arrayBuffer();const bytes=new Uint8Array(arrBuffer);let binary='';for(let i=0;i<bytes.byteLength;i++) binary+=String.fromCharCode(bytes[i]);audioBase64=btoa(binary);}
+const payload={action:"submit",community,submitter,indigenousText,englishText,notes,consent:consent,audioBase64,audioMime:audioBase64?audioMime:null};
+document.getElementById('result').textContent="Submitting...";
+try{const resp=await fetch(WEB_APP_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+const j=await resp.json();if(j.success){document.getElementById('result').textContent="Submitted — thank you. It will be verified by Elders before publication.";document.getElementById('clearBtn').click();} else{document.getElementById('result').textContent="Error: "+(j.message||JSON.stringify(j));}} catch(err){document.getElementById('result').textContent="Network error: "+err.toString();}
+};
+</script>
+</html>

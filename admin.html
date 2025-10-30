@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Voices of the Land — Admin Review</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+:root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--accent-2:#b33a2a;--muted:#6b5847;}
+body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:20px;}
+.wrap{max-width:920px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.05);}
+h1{color:var(--accent);margin:0 0 8px;}
+.entry{border:1px solid #e6dcd1;padding:12px;border-radius:8px;margin-bottom:10px;}
+button{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;}
+.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Pending Submissions — Elder Review</h1>
+<p class="muted">Use this page to verify entries. Marking Verified publishes the item to the public dictionary.</p>
+<div id="list">Loading...</div>
+</div>
+<script>
+const WEB_APP_BASE="https://script.google.com/macros/s/AKfycbyhWppcmIoIEuqe6YRmEyLRG_5Lo2C65XmB2JDKCc8XIfwGHx9XyqtQLDxFQL0b2Lcj/exec";
+const LIST_PENDING=WEB_APP_BASE+"?cmd=listPending";
+async function loadPending(){try{const resp=await fetch(LIST_PENDING);const j=await resp.json();const container=document.getElementById('list');container.innerHTML="";if(!j.entries||j.entries.length===0){container.innerHTML="<p>No pending submissions.</p>";return;}j.entries.forEach(e=>{const div=document.createElement('div');div.className="entry";div.innerHTML=`<div style="font-weight:700">${e.indigenousText} — ${e.englishText}</div><div style="margin-top:6px">Community: ${e.community||"Cree"} • Submitted by: ${e.submitter||"Anonymous"}</div>${e.audioUrl?`<div style="margin-top:8px"><audio controls src="${e.audioUrl}"></audio></div>`:""}${e.notes?`<div style="margin-top:8px">Notes: ${e.notes}</div>`:""}<div style="margin-top:10px"><button data-row="${e.rowIndex}">Verify (publish)</button></div>`;container.appendChild(div);});
+container.querySelectorAll('button[data-row]').forEach(b=>{b.onclick=async()=>{const row=b.getAttribute('data-row');b.disabled=true;b.textContent="Verifying...";const resp=await fetch(WEB_APP_BASE,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"verify",rowIndex:row})});const j2=await resp.json();if(j2.success){b.textContent="Verified ✓";setTimeout(loadPending,600);}else{b.textContent="Error";b.disabled=false;alert("Error: "+(j2.message||JSON.stringify(j2)));}}});}catch(err){document.getElementById('list').textContent="Error loading pending submissions: "+err.toString();}}
+loadPending();
+</script>
+</body>
+</html>

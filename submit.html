@@ -35,7 +35,7 @@
         <li><a href="admin.html">Admin Review</a></li>
       </ul>
     </nav>
-    
+
     <h1>Submit a Word (Cree)</h1>
     <p class="muted">Share a word or phrase. Submissions will be reviewed by community Elders before being published.</p>
 
@@ -75,7 +75,7 @@
       <div id="recStatus" class="muted" style="margin-top:6px"></div>
       <audio id="player" controls style="display:none"></audio>
     </div>
-    
+
     <div class="consent">
       <input type="checkbox" id="consent" />
       <label for="consent">I confirm I have permission to share this word, and understand it may be made public after Elder verification.</label>
@@ -93,7 +93,7 @@
     // --- THIS IS YOUR WORKING LINK ---
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzAJa41a0Tuk0Ju_UvMZp_kjXHsBGH0c8oAYrO_lJLT9ePbRjCyOHwLg4eH72qI-eRuCQ/exec";
     // --- END LINK ---
-    
+
     let mediaRecorder, recordedChunks = [], audioMime = "audio/webm";
     const startBtn = document.getElementById('startBtn');
     const stopBtn = document.getElementById('stopBtn');
@@ -138,13 +138,14 @@
     playBtn.onclick = () => {
       if (player.src) player.play();
     };
-    
+
     document.getElementById('clearBtn').onclick = () => {
       document.getElementById('submitter').value = "";
       document.getElementById('indigenousText').value = "";
       document.getElementById('englishText').value = "";
       document.getElementById('frenchText').value = ""; 
       document.getElementById('notes').value = "";
+document.getElementById('clearBtn').onclick = () => {
       player.src = ""; player.style.display = "none";
       window._latestBlob = null;
       recStatus.textContent = "";
@@ -199,7 +200,7 @@
       submitBtn.disabled = true;
       resultEl.textContent = "Submitting...";
       resultEl.classList.remove('error'); // NEW: Remove error class
-      
+
       try {
         const resp = await fetch(WEB_APP_URL, {
           method: "POST",
@@ -210,13 +211,13 @@
           // --- END FIX ---
           body: JSON.stringify(payload)
         });
-        
+
         if (!resp.ok) {
             throw new Error(`HTTP error! Status: ${resp.status}`);
         }
-        
+
         const j = await resp.json();
-        
+
         if (j.success) {
           resultEl.textContent = "Submitted — thank you. It will be verified by Elders before publication.";
           document.getElementById('clearBtn').click();

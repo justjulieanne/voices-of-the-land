@@ -1,4 +1,6 @@
-
+<!doctype html>
+<html>
+<head>
   <meta charset="utf-8" />
   <title>Voices of the Land — Home</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -16,7 +18,9 @@
     .cta-buttons a{display:inline-block;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:600;}
     .cta-primary{background-color:var(--accent);color:white;}
     .cta-secondary{background-color:transparent;color:var(--accent);border:1px solid var(--accent);}
-  </style></head><body>
+  </style>
+</head>
+<body>
   <div class="wrap">
     <nav class="main-nav">
       <ul>
@@ -44,3 +48,5 @@
     </div>
 
   </div>
+</body>
+</html>

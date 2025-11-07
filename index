@@ -1,4 +1,4 @@
-<!doctype html>
+
 <html>
 <head>
   <meta charset="utf-8" />
@@ -19,8 +19,7 @@
     .cta-primary{background-color:var(--accent);color:white;}
     .cta-secondary{background-color:transparent;color:var(--accent);border:1px solid var(--accent);}
   </style>
-</head>
-<body>
+
   <div class="wrap">
     <nav class="main-nav">
       <ul>

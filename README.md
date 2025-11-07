@@ -33,7 +33,7 @@
     <h3>How This Site Works</h3>
     <p>This tool is built on a "community-first" model. All information is sourced from and verified by the community.</p>
     <ul>
-      <li><strong>Submit a Word:</strong> Community members can submit Cree words, translations, notes, and audio recordings.</li>
+      <li><strong>Submit a Word:</strong> Community members can submit Cree words, translations, notes, and audio recordings will be a feature added later on if we find funding.</li>
       <li><strong>Elder Verification:</strong> Submissions are sent to a private queue. Community Elders review each entry for accuracy and appropriateness.</li>
       <li><strong>Public Dictionary:</strong> Once verified, the entry is published to the Public Dictionary for all learners to access.</li>
     </ul>

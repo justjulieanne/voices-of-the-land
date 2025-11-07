@@ -5,7 +5,8 @@
   <style>
     :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--accent-2:#b33a2a;--muted:#6b5847;}
     body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:20px;margin:0;}
-    .wrap{max-width:920px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.05)}
+    /* Hide the main content by default */
+    .wrap{max-width:920px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.05); display: none;}
     h1{color:var(--accent);margin:0 0 8px}
     .entry{border:1px solid #e6dcd1;padding:12px;border-radius:8px;margin-bottom:10px}
     button{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
@@ -14,8 +15,10 @@
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
     .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
     .main-nav a:hover{background-color:var(--accent-2);}
+    #error-message{text-align:center;font-size:18px;font-weight:600;color:var(--accent-2);display:none;}
   </style></head><body>
-  <div class="wrap">
+  
+  <div class="wrap" id="mainContent">
     <nav class="main-nav">
       <ul>
         <li><a href="index.html">Home</a></li>
@@ -28,7 +31,36 @@
     <h1>Pending Submissions — Elder Review</h1>
     <p class="muted">Use this page to verify entries. Marking Verified publishes the item to the public dictionary.</p>
     <div id="list">Loading...</div>
-  </div><script>const WEB_APP_BASE = "https://script.google.com/macros/s/AKfycbyhWppcmIoIEuqe6YRmEyLRG_5Lo2C65XmB2JDKCc8XIfwGHx9XyqtQLDxFQL0b2Lcj/exec";const LIST_PENDING = WEB_APP_BASE + "?cmd=listPending";async function loadPending() {
+  </div>
+
+  <div id="errorMessage">Access Denied.</div>
+
+<script>
+const WEB_APP_BASE = "https://script.google.com/macros/s/AKfycbyhWppcmIoIEuqe6YRmEyLRG_5Lo2C65XmB2JDKCc8XIfwGHx9XyqtQLDxFQL0b2Lcj/exec";
+const LIST_PENDING = WEB_APP_BASE + "?cmd=listPending";
+
+// --- NEW PASSWORD FUNCTION ---
+function checkPassword() {
+  // You can change this password to whatever you want
+  const PASSWORD = "CreeAdmin2025"; 
+
+  const entry = prompt("Please enter the Admin Password:");
+
+  if (entry === PASSWORD) {
+    // Password is correct! Show the main content and load the data.
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('errorMessage').style.display = 'none';
+    loadPending();
+  } else {
+    // Password is wrong! Keep content hidden and show error.
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('errorMessage').style.display = 'block';
+  }
+}
+// --- END NEW FUNCTION ---
+
+
+async function loadPending() {
   try {
     const resp = await fetch(LIST_PENDING);
     const j = await resp.json();
@@ -74,4 +106,8 @@
   } catch (err) {
     document.getElementById('list').textContent = "Error loading pending submissions: " + err.toString();
   }
-}loadPending();</script></body></html>
+}
+
+// Run the password check as soon as the page loads
+checkPassword();
+</script></body></html>

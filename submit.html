@@ -63,9 +63,16 @@
       <textarea id="notes" rows="3" placeholder="Optional notes for Elders or learners"></textarea>
     </label>
 
-    <!-- Audio recording is a complex feature with Firebase Storage.
-         For this version, I've removed the audio button to focus on the database.
-         We can add audio back later as a separate, bigger upgrade. -->
+    <div style="margin-top:12px;">
+      <p class="muted">Record audio (optional)</p>
+      <div class="controls">
+        <button id="startBtn">Start Recording</button>
+        <button id="stopBtn" disabled>Stop</button>
+        <button id="playBtn" class="secondary" disabled>Play</button>
+      </div>
+      <div id="recStatus" class="muted" style="margin-top:6px"></div>
+      <audio id="player" controls style="display:none"></audio>
+    </div>
     
     <div class="consent">
       <input type="checkbox" id="consent" />
@@ -80,60 +87,60 @@
     <div id="result" class="result"></div>
   </div>
 
-  <!-- Import Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    // --- Firebase Config ---
-    // These variables are provided by the environment.
-    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+  <script>
+    // --- THIS IS THE CORRECT, WORKING LINK ---
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDuS3zhXNS4JZj4Iwys7j7V15VSNJjtR72qcrz094zYY535gOZbT75KXAOaIXjBzxf/exec";
+    // --- END LINK ---
     
-    let db, auth;
-    let wordsCollection;
-    let currentUserId;
-
-    // --- DOM Elements ---
+    let mediaRecorder, recordedChunks = [], audioMime = "audio/webm";
+    const startBtn = document.getElementById('startBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const playBtn = document.getElementById('playBtn');
+    const player = document.getElementById('player');
+    const recStatus = document.getElementById('recStatus');
     const submitBtn = document.getElementById('submitBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const resultEl = document.getElementById('result');
 
-    // --- Initialization ---
-    try {
-      setLogLevel('debug');
-      const app = initializeApp(firebaseConfig);
-      auth = getAuth(app);
-      db = getFirestore(app);
-
-      // Sign in the user (anonymously or with token)
-      if (authToken) {
-        await signInWithCustomToken(auth, authToken);
-      } else {
-        await signInAnonymously(auth);
+    startBtn.onclick = async () => {
+      recordedChunks = [];
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: audioMime });
+          const url = URL.createObjectURL(blob);
+          player.src = url; player.style.display = "block"; playBtn.disabled = false;
+          recStatus.textContent = `Recorded ${Math.round(blob.size/1000)} KB`;
+          window._latestBlob = blob;
+        };
+        mediaRecorder.start();
+        startBtn.disabled = true; stopBtn.disabled = false;
+        recStatus.textContent = "Recording...";
+      } catch (err) {
+        alert("Microphone access is required to record audio.");
       }
-      currentUserId = auth.currentUser.uid;
-      
-      // Define the public collection path
-      wordsCollection = collection(db, 'artifacts', appId, 'public', 'data', 'words');
+    };
 
-    } catch (e) {
-      console.error("Firebase Init Error:", e);
-      resultEl.textContent = "Error: Could not connect to database.";
-      resultEl.style.color = "red";
-    }
+    stopBtn.onclick = () => {
+      if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+      startBtn.disabled = false; stopBtn.disabled = true;
+    };
 
-    // --- Event Handlers ---
-    clearBtn.onclick = () => {
+    playBtn.onclick = () => {
+      if (player.src) player.play();
+    };
+    
+    document.getElementById('clearBtn').onclick = () => {
       document.getElementById('submitter').value = "";
       document.getElementById('indigenousText').value = "";
       document.getElementById('englishText').value = "";
-      document.getElementById('frenchText').value = "";
+      document.getElementById('frenchText').value = ""; 
       document.getElementById('notes').value = "";
+      player.src = ""; player.style.display = "none";
+      window._latestBlob = null;
+      recStatus.textContent = "";
       document.getElementById('consent').checked = false;
-      resultEl.textContent = "";
+      document.getElementById('result').textContent = "";
     };
 
     submitBtn.onclick = async () => {
@@ -141,52 +148,62 @@
       const community = document.getElementById('community').value;
       const indigenousText = document.getElementById('indigenousText').value.trim();
       const englishText = document.getElementById('englishText').value.trim();
-      const frenchText = document.getElementById('frenchText').value.trim();
+      const frenchText = document.getElementById('frenchText').value.trim(); 
       const notes = document.getElementById('notes').value.trim();
       const consent = document.getElementById('consent').checked;
 
       if (!indigenousText || !englishText) {
-        resultEl.textContent = "Please provide at least Indigenous text and English translation.";
-        resultEl.style.color = "red";
+        alert("Please provide at least Indigenous text and English translation.");
         return;
       }
       if (!consent) {
-        resultEl.textContent = "Please check the consent box before submitting.";
-        resultEl.style.color = "red";
+        alert("Please check the consent box before submitting.");
         return;
       }
 
-      // Disable button
+      let audioBase64 = null;
+      if (window._latestBlob) {
+        // Convert blob to base64
+        const arrBuffer = await window._latestBlob.arrayBuffer();
+        const bytes = new Uint8Array(arrBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+        audioBase64 = btoa(binary);
+      }
+
+      const payload = {
+        action: "submit",
+        community,
+        submitter,
+        indigenousText,
+        englishText,
+        frenchText, // Added French
+        notes,
+        consent: consent,
+        audioBase64,
+        audioMime: audioBase64 ? audioMime : null
+      };
+
       submitBtn.disabled = true;
-      resultEl.textContent = "Submitting...";
-      resultEl.style.color = "var(--muted)";
-
+      document.getElementById('result').textContent = "Submitting...";
+      
       try {
-        // Create the new document for Firestore
-        const newWord = {
-          submitterName: submitter,
-          submitterId: currentUserId,
-          community: community,
-          indigenousText: indigenousText,
-          englishText: englishText,
-          frenchText: frenchText,
-          notes: notes,
-          consent: consent,
-          verified: false, // <-- Set to false by default for review
-          createdAt: serverTimestamp() // Adds a server-side timestamp
-        };
-
-        // Add the new document to the 'words' collection
-        const docRef = await addDoc(wordsCollection, newWord);
+        const resp = await fetch(WEB_APP_URL, {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(payload)
+        });
+        const j = await resp.json();
         
-        resultEl.textContent = "Submitted! Thank you. It will be reviewed by Elders.";
-        resultEl.style.color = "green";
-        clearBtn.click(); // Clear the form
-
-      } catch (e) {
-        console.error("Error adding document: ", e);
-        resultEl.textContent = "Error: Could not submit. Please try again.";
-        resultEl.style.color = "red";
+        if (j.success) {
+          document.getElementById('result').textContent = "Submitted — thank you. It will be verified by Elders before publication.";
+          document.getElementById('clearBtn').click();
+        } else {
+          document.getElementById('result').textContent = "Error: " + (j.message || JSON.stringify(j));
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        document.getElementById('result').textContent = "Network error: " + err.toString();
       } finally {
         submitBtn.disabled = false;
       }

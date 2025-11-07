@@ -10,7 +10,7 @@
     .entry{border-bottom:1px dashed #e7ded4;padding:12px 0}
     .word{font-size:18px;font-weight:700;color:#3f2b20}
     .meta{font-size:13px;color:#7a6a5f;margin-top:6px}
-    .translation{margin-top:6px; padding-left: 10px;} /* <-- Added some style */
+    .translation{margin-top:6px; padding-left: 10px;}
     audio{margin-top:8px;width:100%}
     .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
@@ -30,7 +30,12 @@
     <h1>Public Dictionary (Verified)</h1>
     <p class="meta">Compiled entries verified by community Elders. If you submitted a word, check with Elders for publication status.</p>
     <div id="list">Loading...</div>
-  </div><script>const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDuS3zhXNS4JZj4Iwys7j7V15VSNJjtR72qcrz094zYY535gOZbT75KXAOaIXjBzxf/exec?cmd=listVerified";async function load() {
+  </div><script>
+/* === THIS IS THE FIX === */
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDuS3zhXNS4JZj4Iwys7j7V15VSNJjtR72qcrz094zYY535gOZbT75KXAOaIXjBzxf/exec?cmd=listVerified";
+/* === END FIX === */
+
+async function load() {
   try {
     const resp = await fetch(WEB_APP_URL);
     const j = await resp.json();
@@ -42,14 +47,12 @@
     }
     j.entries.forEach(e => {
       const div = document.createElement('div'); div.className = "entry";
-      // --- UPDATED DISPLAY ---
       div.innerHTML = `<div class="word">${e.indigenousText}</div>
         <div class="translation"><b>English:</b> ${e.englishText}</div>
         ${e.frenchText ? `<div class="translation"><b>French:</b> ${e.frenchText}</div>` : ""}
         <div class="meta">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"} • ${new Date(e.timestamp).toLocaleString()}</div>
         ${e.audioUrl ? `<div style="margin-top:8px"><audio controls src="${e.audioUrl}"></audio></div>` : ""}
         ${e.notes ? `<div style="margin-top:8px;font-size:14px">Notes: ${e.notes}</div>` : ""}`;
-      // --- END UPDATE ---
       container.appendChild(div);
     });
   } catch (err) {

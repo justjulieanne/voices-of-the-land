@@ -1,7 +1,4 @@
 
-  <meta charset="utf-8" />
-
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--accent-2:#b33a2a;--muted:#6b5847;}
     body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:22px;margin:0;}

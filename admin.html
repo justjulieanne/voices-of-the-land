@@ -39,26 +39,20 @@
 const WEB_APP_BASE = "https://script.google.com/macros/s/AKfycbyhWppcmIoIEuqe6YRmEyLRG_5Lo2C65XmB2JDKCc8XIfwGHx9XyqtQLDxFQL0b2Lcj/exec";
 const LIST_PENDING = WEB_APP_BASE + "?cmd=listPending";
 
-// --- NEW PASSWORD FUNCTION ---
+// --- PASSWORD FUNCTION ---
 function checkPassword() {
-  // You can change this password to whatever you want
   const PASSWORD = "CreeAdmin2025"; 
-
   const entry = prompt("Please enter the Admin Password:");
-
   if (entry === PASSWORD) {
-    // Password is correct! Show the main content and load the data.
     document.getElementById('mainContent').style.display = 'block';
     document.getElementById('errorMessage').style.display = 'none';
     loadPending();
   } else {
-    // Password is wrong! Keep content hidden and show error.
     document.getElementById('mainContent').style.display = 'none';
     document.getElementById('errorMessage').style.display = 'block';
   }
 }
-// --- END NEW FUNCTION ---
-
+// --- END FUNCTION ---
 
 async function loadPending() {
   try {
@@ -72,11 +66,15 @@ async function loadPending() {
     }
     j.entries.forEach(e => {
       const div = document.createElement('div'); div.className = "entry";
-      div.innerHTML = `<div style="font-weight:700">${e.indigenousText} — ${e.englishText}</div>
-        <div style="margin-top:6px">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"}</div>
+      // --- UPDATED DISPLAY ---
+      div.innerHTML = `<div style="font-weight:700">${e.indigenousText}</div>
+        <div style="margin-top:4px"><b>English:</b> ${e.englishText}</div>
+        ${e.frenchText ? `<div style="margin-top:4px"><b>French:</b> ${e.frenchText}</div>` : ""}
+        <div style="margin-top:6px; font-size: 14px;">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"}</div>
         ${e.audioUrl ? `<div style="margin-top:8px"><audio controls src="${e.audioUrl}"></audio></div>` : ""}
         ${e.notes ? `<div style="margin-top:8px">Notes: ${e.notes}</div>` : ""}
         <div style="margin-top:10px"><button data-row="${e.rowIndex}">Verify (publish)</button></div>`;
+      // --- END UPDATE ---
       container.appendChild(div);
     });
 

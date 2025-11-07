@@ -1,4 +1,3 @@
-
   <style>
     :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--accent-2:#b33a2a;--muted:#6b5847;}
     body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:22px;margin:0;}
@@ -15,7 +14,7 @@
     .cta-secondary{background-color:transparent;color:var(--accent);border:1px solid var(--accent);}
   </style>
   <div class="wrap">
-    <nav class="main-nav">
+    
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="submit.html">Submit a Word</a></li>

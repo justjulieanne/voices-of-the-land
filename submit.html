@@ -52,6 +52,9 @@
       <input id="englishText" type="text" placeholder="Enter English translation" />
     </label>
 
+    <label>French translation
+      <input id="frenchText" type="text" placeholder="Enter French translation" />
+    </label>
     <label>Notes (usage, dialect notes, context)
       <textarea id="notes" rows="3" placeholder="Optional notes for Elders or learners"></textarea>
     </label>
@@ -112,6 +115,7 @@ playBtn.onclick = () => {
   document.getElementById('submitter').value = "";
   document.getElementById('indigenousText').value = "";
   document.getElementById('englishText').value = "";
+  document.getElementById('frenchText').value = ""; // <-- NEW
   document.getElementById('notes').value = "";
   player.src = ""; player.style.display = "none";
   window._latestBlob = null;
@@ -122,10 +126,11 @@ playBtn.onclick = () => {
   const community = document.getElementById('community').value;
   const indigenousText = document.getElementById('indigenousText').value.trim();
   const englishText = document.getElementById('englishText').value.trim();
+  const frenchText = document.getElementById('frenchText').value.trim(); // <-- NEW
   const notes = document.getElementById('notes').value.trim();
   const consent = document.getElementById('consent').checked;
 
-  if (!indigenousText || !englishText) return alert("Please provide both Indigenous text and English translation.");
+  if (!indigenousText || !englishText) return alert("Please provide at least Indigenous text and English translation.");
   if (!consent) return alert("Please check the consent box before submitting.");
 
   let audioBase64 = null;
@@ -143,6 +148,7 @@ playBtn.onclick = () => {
     submitter,
     indigenousText,
     englishText,
+    frenchText, // <-- NEW
     notes,
     consent: consent,
     audioBase64,

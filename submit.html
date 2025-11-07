@@ -17,6 +17,8 @@
     .consent{margin-top:10px;display:flex;align-items:center;gap:8px}
     audio{margin-top:8px;width:100%}
     .result{margin-top:12px;font-weight:600}
+    /* THIS IS NEW - Makes errors red */
+    .result.error{color:var(--accent-2);}
     .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
     .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
@@ -88,7 +90,7 @@
   </div>
 
   <script>
-    // --- THIS IS THE CORRECT, WORKING LINK ---
+    // --- THIS IS YOUR WORKING LINK ---
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby7KGy503kkD5RZcApsuXVseTZC6WpW03Z9NCegxE_JUqRdoY96KV3igT3F5nX-wor6bA/exec";
     // --- END LINK ---
     
@@ -99,6 +101,7 @@
     const player = document.getElementById('player');
     const recStatus = document.getElementById('recStatus');
     const submitBtn = document.getElementById('submitBtn');
+    const resultEl = document.getElementById('result'); // Get the result div
 
     startBtn.onclick = async () => {
       recordedChunks = [];
@@ -116,8 +119,14 @@
         mediaRecorder.start();
         startBtn.disabled = true; stopBtn.disabled = false;
         recStatus.textContent = "Recording...";
+        resultEl.textContent = ""; // Clear any old errors
+        resultEl.classList.remove('error'); // NEW: Remove error class
       } catch (err) {
-        alert("Microphone access is required to record audio.");
+        // THIS IS THE FIX:
+        // Shows a clear error on the page instead of a broken alert()
+        resultEl.textContent = "Error: Microphone access denied. Please check your browser's permissions (look for a mic icon in the address bar) and allow access.";
+        resultEl.classList.add('error'); // NEW: Add error class
+        console.error("Audio Error:", err);
       }
     };
 
@@ -140,7 +149,8 @@
       window._latestBlob = null;
       recStatus.textContent = "";
       document.getElementById('consent').checked = false;
-      document.getElementById('result').textContent = "";
+      resultEl.textContent = "";
+      resultEl.classList.remove('error'); // NEW: Remove error class
     };
 
     submitBtn.onclick = async () => {
@@ -153,7 +163,70 @@
       const consent = document.getElementById('consent').checked;
 
       if (!indigenousText || !englishText) {
-        alert("Please provide at least Indigenous text and English translation.");
+        resultEl.textContent = "Error: Please provide at least Indigenous text and English translation.";
+        resultEl.classList.add('error'); // NEW: Add error class
         return;
       }
-      if (!consent)
+      if (!consent) {
+        resultEl.textContent = "Error: Please check the consent box before submitting.";
+        resultEl.classList.add('error'); // NEW: Add error class
+        return;
+      }
+
+      let audioBase64 = null;
+      if (window._latestBlob) {
+        // Convert blob to base64
+        const arrBuffer = await window._latestBlob.arrayBuffer();
+        const bytes = new Uint8Array(arrBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+        audioBase64 = btoa(binary);
+      }
+
+      const payload = {
+        action: "submit",
+        community,
+        submitter,
+        indigenousText,
+        englishText,
+        frenchText, // Added French
+        notes,
+        consent: consent,
+        audioBase64,
+        audioMime: audioBase64 ? audioMime : null
+      };
+
+      submitBtn.disabled = true;
+      resultEl.textContent = "Submitting...";
+      resultEl.classList.remove('error'); // NEW: Remove error class
+      
+      try {
+        const resp = await fetch(WEB_APP_URL, {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify(payload)
+        });
+        
+        if (!resp.ok) {
+            throw new Error(`HTTP error! Status: ${resp.status}`);
+        }
+        
+        const j = await resp.json();
+        
+        if (j.success) {
+          resultEl.textContent = "Submitted — thank you. It will be verified by Elders before publication.";
+          document.getElementById('clearBtn').click();
+        } else {
+          resultEl.textContent = "Error: " + (j.message || JSON.stringify(j));
+          resultEl.classList.add('error'); // NEW: Add error class
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        resultEl.textContent = `Submission failed. Please check your internet connection. (Error: ${err.message})`;
+        resultEl.classList.add('error'); // NEW: Add error class
+      } finally {
+        submitBtn.disabled = false;
+      }
+    };
+  </script>
+</body></html>

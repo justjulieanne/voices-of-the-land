@@ -1,7 +1,7 @@
 <!doctype html><html><head>
   <meta charset="utf-8">
   <title>Voices of the Land — Admin Review</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale:1" />
   <style>
     :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--accent-2:#b33a2a;--muted:#6b5847;}
     body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:20px;margin:0;}
@@ -9,8 +9,14 @@
     .wrap{max-width:920px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.05); display: none;}
     h1{color:var(--accent);margin:0 0 8px}
     .entry{border:1px solid #e6dcd1;padding:12px;border-radius:8px;margin-bottom:10px}
-    button{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
-    .secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+    
+    /* Button styles */
+    .btn-container{margin-top:10px; display:flex; gap: 8px;}
+    button{border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600;}
+    button:disabled{background-color:#ccc;cursor:not-allowed;}
+    .btn-verify{background:var(--accent);color:white;}
+    .btn-decline{background:transparent;color:var(--accent-2);border:1px solid var(--accent-2);} /* <-- NEW BUTTON STYLE */
+
     .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
     .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
@@ -29,84 +35,158 @@
     </nav>
     
     <h1>Pending Submissions — Elder Review</h1>
-    <p class="muted">Use this page to verify entries. Marking Verified publishes the item to the public dictionary.</p>
+    <p class="muted">Use this page to verify entries. Marking "Verified" publishes the item to the public dictionary. "Decline" permanently deletes the submission.</p>
     <div id="list">Loading...</div>
   </div>
 
   <div id="errorMessage">Access Denied.</div>
 
 <script>
-/* === THIS IS THE FIX === */
-const WEB_APP_BASE = "https://script.google.com/macros/s/AKfycby7KGy503kkD5RZcApsuXVseTZC6WpW03Z9NCegxE_JUqRdoY96KV3igT3F5nX-wor6bA/exec";
-/* === END FIX === */
+    // --- THIS IS YOUR WORKING LINK ---
+    const WEB_APP_BASE = "https://script.google.com/macros/s/AKfycby7KGy503kkD5RZcApsuXVseTZC6WpW03Z9NCegxE_JUqRdoY96KV3igT3F5nX-wor6bA/exec";
+    // --- END LINK ---
+    
+    const LIST_PENDING = WEB_APP_BASE + "?cmd=listPending";
 
-const LIST_PENDING = WEB_APP_BASE + "?cmd=listPending";
-
-// --- PASSWORD FUNCTION ---
-function checkPassword() {
-  const PASSWORD = "CreeAdmin2025"; 
-  const entry = prompt("Please enter the Admin Password:");
-  if (entry === PASSWORD) {
-    document.getElementById('mainContent').style.display = 'block';
-    document.getElementById('errorMessage').style.display = 'none';
-    loadPending();
-  } else {
-    document.getElementById('mainContent').style.display = 'none';
-    document.getElementById('errorMessage').style.display = 'block';
-  }
-}
-// --- END FUNCTION ---
-
-async function loadPending() {
-  try {
-    const resp = await fetch(LIST_PENDING);
-    const j = await resp.json();
-    const container = document.getElementById('list');
-    container.innerHTML = "";
-    if (!j.entries || j.entries.length === 0) {
-      container.innerHTML = "<p>No pending submissions.</p>";
-      return;
+    // --- PASSWORD FUNCTION ---
+    function checkPassword() {
+      const PASSWORD = "CreeAdmin2025"; 
+      const entry = prompt("Please enter the Admin Password:");
+      if (entry === PASSWORD) {
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        loadPending(); // Load data only if password is correct
+      } else {
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('errorMessage').textContent = "Access Denied.";
+        document.getElementById('errorMessage').style.display = 'block';
+      }
     }
-    j.entries.forEach(e => {
-      const div = document.createElement('div'); div.className = "entry";
-      div.innerHTML = `<div style="font-weight:700">${e.indigenousText}</div>
-        <div style="margin-top:4px"><b>English:</b> ${e.englishText}</div>
-        ${e.frenchText ? `<div style="margin-top:4px"><b>French:</b> ${e.frenchText}</div>` : ""}
-        <div style="margin-top:6px; font-size: 14px;">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"}</div>
-        ${e.audioUrl ? `<div style="margin-top:8px"><audio controls src="${e.audioUrl}"></audio></div>` : ""}
-        ${e.notes ? `<div style="margin-top:8px">Notes: ${e.notes}</div>` : ""}
-        <div style="margin-top:10px"><button data-row="${e.rowIndex}">Verify (publish)</button></div>`;
-      container.appendChild(div);
-    });
+    // --- END FUNCTION ---
 
-    container.querySelectorAll('button[data-row]').forEach(b => {
-      b.onclick = async () => {
-        const isConfirmed = confirm("Are you sure you want to verify and publish this entry?");
-        if (!isConfirmed) { return; }
-
-        const row = b.getAttribute('data-row');
-        b.disabled = true; b.textContent = "Verifying...";
-        const resp = await fetch(WEB_APP_BASE, {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ action: "verify", rowIndex: row })
-        });
-        const j2 = await resp.json();
-        if (j2.success) {
-          b.textContent = "Verified ✓";
-          setTimeout(loadPending, 600);
-        } else {
-          b.textContent = "Error";
-          b.disabled = false;
-          alert("Error: " + (j2.message || JSON.stringify(j2)));
+    async function loadPending() {
+      const container = document.getElementById('list');
+      try {
+        const resp = await fetch(LIST_PENDING);
+        if (!resp.ok) { // Check if response is not 200-299
+            throw new Error(`HTTP error! status: ${resp.status}`);
         }
-      };
-    });
-  } catch (err) {
-    document.getElementById('list').textContent = "Error loading pending submissions: " + err.toString();
-  }
-}
+        const j = await resp.json();
+        
+        container.innerHTML = "";
+        if (!j.entries || j.entries.length === 0) {
+          container.innerHTML = "<p>No pending submissions.</p>";
+          return;
+        }
+        
+        j.entries.forEach(e => {
+          const div = document.createElement('div'); div.className = "entry";
+          // --- UPDATED BUTTONS ---
+          div.innerHTML = `
+            <div style="font-weight:700">${e.indigenousText}</div>
+            <div style="margin-top:4px"><b>English:</b> ${e.englishText}</div>
+            ${e.frenchText ? `<div style="margin-top:4px"><b>French:</b> ${e.frenchText}</div>` : ""}
+            <div style="margin-top:6px; font-size: 14px;">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"}</div>
+            ${e.audioUrl ? `<div style="margin-top:8px"><audio controls src="${e.audioUrl}"></audio></div>` : ""}
+            ${e.notes ? `<div style="margin-top:8px">Notes: ${e.notes}</div>` : ""}
+            <div class="btn-container">
+              <button class="btn-verify" data-row="${e.rowIndex}">Verify (publish)</button>
+              <button class="btn-decline" data-row="${e.rowIndex}">Decline (delete)</button>
+            </div>`;
+          // --- END UPDATE ---
+          container.appendChild(div);
+        });
 
-// Run the password check as soon as the page loads
-checkPassword();
-</script></body></html>
+        // Add event listeners to all new "Verify" buttons
+        container.querySelectorAll('button.btn-verify').forEach(b => {
+          b.onclick = async () => {
+            const isConfirmed = confirm("Are you sure you want to verify and PUBLISH this entry?");
+            if (!isConfirmed) { return; }
+
+            const row = b.getAttribute('data-row');
+            b.disabled = true;
+            b.textContent = "Verifying...";
+            // Also disable the decline button
+            b.closest('.btn-container').querySelector('.btn-decline').disabled = true;
+
+            try {
+              const resp = await fetch(WEB_APP_BASE, {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ action: "verify", rowIndex: row })
+              });
+              if (!resp.ok) {
+                  throw new Error(`HTTP error! status: ${resp.status}`);
+              }
+              const j2 = await resp.json();
+              if (j2.success) {
+                b.textContent = "Verified ✓";
+                setTimeout(loadPending, 600); // Refresh list
+              } else {
+                b.textContent = "Error";
+                b.disabled = false;
+                b.closest('.btn-container').querySelector('.btn-decline').disabled = false;
+                alert("Error: " + (j2.message || JSON.stringify(j2)));
+              }
+            } catch (err) {
+              b.textContent = "Error";
+              b.disabled = false;
+              b.closest('.btn-container').querySelector('.btn-decline').disabled = false;
+              console.error("Verify Error:", err);
+              alert("Network error: " + err.toString());
+            }
+          };
+        });
+
+        // --- NEW EVENT LISTENER FOR DECLINE BUTTONS ---
+        container.querySelectorAll('button.btn-decline').forEach(b => {
+          b.onclick = async () => {
+            const isConfirmed = confirm("Are you sure you want to decline and PERMANENTLY DELETE this entry? This cannot be undone.");
+            if (!isConfirmed) { return; }
+
+            const row = b.getAttribute('data-row');
+            b.disabled = true;
+            b.textContent = "Declining...";
+            // Also disable the verify button
+            b.closest('.btn-container').querySelector('.btn-verify').disabled = true;
+
+            try {
+              const resp = await fetch(WEB_APP_BASE, {
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ action: "decline", rowIndex: row })
+              });
+              if (!resp.ok) {
+                  throw new Error(`HTTP error! status: ${resp.status}`);
+              }
+              const j2 = await resp.json();
+              if (j2.success) {
+                b.textContent = "Declined ✓";
+                setTimeout(loadPending, 600); // Refresh list
+              } else {
+                b.textContent = "Error";
+                b.disabled = false;
+                b.closest('.btn-container').querySelector('.btn-verify').disabled = false;
+                alert("Error: " + (j2.message || JSON.stringify(j2)));
+              }
+            } catch (err) {
+              b.textContent = "Error";
+              b.disabled = false;
+              b.closest('.btn-container').querySelector('.btn-verify').disabled = false;
+              console.error("Decline Error:", err);
+              alert("Network error: " + err.toString());
+            }
+          };
+        });
+        // --- END NEW LISTENER ---
+
+      } catch (err) {
+        console.error("Error loading pending submissions:", err);
+        container.innerHTML = `<p>Error loading pending submissions: ${err.message}. Please check console and refresh.</p>`;
+      }
+    }
+
+    // Run the password check as soon as the page loads
+    checkPassword();
+</script>
+</body></html>

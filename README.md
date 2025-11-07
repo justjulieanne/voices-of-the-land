@@ -16,7 +16,7 @@
     .cta-buttons a{display:inline-block;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:600;}
     .cta-primary{background-color:var(--accent);color:white;}
     .cta-secondary{background-color:transparent;color:var(--accent);border:1px solid var(--accent);}
-  </style></head><body>
+  </style>
   <div class="wrap">
     <nav class="main-nav">
       <ul>

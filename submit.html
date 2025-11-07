@@ -139,12 +139,14 @@
       if (player.src) player.play();
     };
     
-    document.getElementById('clearBtn').onclick = () => {
-      document.getElementById('submitter').value = "";
-      document.getElementById('indigenousText').value = "";
-      document.getElementById('englishText').value = "";
-      document.getElementById('frenchText').value = ""; 
-      document.getElementById('notes').value = "";
+document.getElementById('clearBtn').onclick = () => {
+  document.getElementById('submitter').value = "";
+  document.getElementById('indigenousText').value = "";
+  document.getElementById('syllabicsText').value = "";
+  document.getElementById('englishText').value = "";
+  document.getElementById('frenchText').value = "";
+  document.getElementById('pronunciation').value = "";
+  document.getElementById('notes').value = "";
       player.src = ""; player.style.display = "none";
       window._latestBlob = null;
       recStatus.textContent = "";
@@ -154,13 +156,15 @@
     };
 
     submitBtn.onclick = async () => {
-      const submitter = document.getElementById('submitter').value.trim();
-      const community = document.getElementById('community').value;
-      const indigenousText = document.getElementById('indigenousText').value.trim();
-      const englishText = document.getElementById('englishText').value.trim();
-      const frenchText = document.getElementById('frenchText').value.trim(); 
-      const notes = document.getElementById('notes').value.trim();
-      const consent = document.getElementById('consent').checked;
+  const submitter = document.getElementById('submitter').value.trim();
+  const community = document.getElementById('community').value;
+  const indigenousText = document.getElementById('indigenousText').value.trim();
+  const syllabicsText = document.getElementById('syllabicsText').value.trim();
+  const englishText = document.getElementById('englishText').value.trim();
+  const frenchText = document.getElementById('frenchText').value.trim();
+  const pronunciation = document.getElementById('pronunciation').value.trim();
+  const notes = document.getElementById('notes').value.trim();
+  const consent = document.getElementById('consent').checked;
 
       if (!indigenousText || !englishText) {
         resultEl.textContent = "Error: Please provide at least Indigenous text and English translation.";

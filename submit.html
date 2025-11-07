@@ -203,7 +203,11 @@
       try {
         const resp = await fetch(WEB_APP_URL, {
           method: "POST",
-          headers: {"Content-Type":"application/json"},
+          // --- THIS IS THE FIX ---
+          // Changing Content-Type to text/plain to see if it fixes the CORS/preflight issue.
+          // Google Apps Script can sometimes be strange about application/json.
+          headers: {"Content-Type":"text/plain;charset=utf-8"},
+          // --- END FIX ---
           body: JSON.stringify(payload)
         });
         

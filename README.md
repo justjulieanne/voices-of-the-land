@@ -24,7 +24,7 @@
         <li><a href="dictionary.html">Public Dictionary</a></li>
         <li><a href="admin.html">Admin Review</a></li>
       </ul>
-    </nav>
+   
     
     <h1>Welcome to Voices of the Land</h1>
     <p>This digital tool is a community-driven project dedicated to the preservation and revitalization of the Cree language. It was created as part of a Design Thinking project to address the real-world need for accessible, community-led language preservation.</p>

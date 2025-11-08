@@ -1,39 +1,5 @@
 
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Voices of the Land — Home</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root {
-      --bg:#f5efe6;
-      --card:#fff9f2;
-      --accent:#8a4b2a;
-      --accent-2:#b33a2a;
-      --muted:#6b5847;
-    }
-    body {
-      font-family: Inter, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--muted);
-      padding: 22px;
-      margin: 0;
-    }
-    .wrap {
-      max-width: 720px;
-      margin: 0 auto;
-      background: var(--card);
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-    }
-    h1 {
-      color: var(--accent);
-      margin: 0 0 10px;
-      font-size: 24px;
-    }
-    h3 { color: var(--accent); }
-    p { line-height: 1.6; }
+
 
     /* --- Navigation styling (copied from submit page) --- */
     .main-nav {

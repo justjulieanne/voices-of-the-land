@@ -4,19 +4,56 @@
   <meta name="viewport" content="width=device-width,initial-scale:1" />
   <style>
     :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--muted:#6b5847;}
-    body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:20px;margin:0;}
-    .wrap{max-width:900px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.05)}
+    body{
+      font-family:Inter, Arial, sans-serif;
+      background-color:var(--bg);
+      color:var(--muted);
+      padding:20px;
+      margin:0;
+      /* --- THIS IS THE NEW ARTWORK --- */
+      /* White (Top), Black (Left), Red (Bottom), Yellow (Right) */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 10 C20 10 20 20 30 30 C40 20 40 10 30 10' fill='%23FFFFFF' fill-opacity='0.7'/%3E%3Cpath d='M30 50 C20 50 20 40 30 30 C40 40 40 50 30 50' fill='%23B33A2A' fill-opacity='0.5'/%3E%3Cpath d='M10 30 C10 20 20 20 30 30 C20 40 10 40 10 30' fill='%23333333' fill-opacity='0.5'/%3E%3Cpath d='M50 30 C50 20 40 20 30 30 C40 40 50 40 50 30' fill='%23FFD700' fill-opacity='0.5'/%3E%3C/svg%3E");
+      /* --- END ARTWORK --- */
+    }
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
+      background: rgba(255, 249, 242, 0.98); /* 98% opacity */
+      padding:18px;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.05)
+    }
     h1{color:var(--accent);margin:0 0 8px}
     .entry{border-bottom:1px dashed #e7ded4;padding:12px 0}
     .word{font-size:18px;font-weight:700;color:#3f2b20}
     .syllabics{font-size:20px;font-weight:500;color:#3f2b20;margin-top:4px;}
     .meta{font-size:13px;color:#7a6a5f;margin-top:6px}
     .translation{margin-top:6px; padding-left: 10px;}
+    .notes{margin-top:6px; padding-left: 10px; font-style: italic;}
     audio{margin-top:8px;width:100%}
     .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
     .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
     .main-nav a:hover{background-color:var(--accent-2);}
+    
+    /* --- NEW SEARCH BAR STYLE --- */
+    #searchBox {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #e6dcd1;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box; /* Important for 100% width */
+    }
+    #noResults {
+      display: none; /* Hidden by default */
+      padding: 15px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    /* --- END SEARCH BAR STYLE --- */
+
   </style></head><body>
   <div class="wrap">
     <nav class="main-nav">
@@ -30,12 +67,49 @@
 
     <h1>Public Dictionary (Verified)</h1>
     <p class="meta">Compiled entries verified by community Elders. If you submitted a word, check with Elders for publication status.</p>
+    
+    <!-- NEW SEARCH BAR HTML -->
+    <input type="text" id="searchBox" placeholder="Search for a word (English, Cree, or Syllabics)...">
+    <!-- END NEW HTML -->
+
     <div id="list">Loading...</div>
+    <div id="noResults">No entries match your search.</div>
+
   </div><script>
     // --- THIS IS YOUR WORKING LINK ---
-    // You must use the link from your most recent, successful deployment
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw27lNpaPmfAktNrBl3eZgQ-xA2xDkMhiC7-_KCfk9RLKdxAE_y_BBFP-ulPC3oO1zHpg/exec?cmd=listVerified";
     // --- END LINK ---
+
+// --- NEW SEARCH FUNCTION ---
+function setupSearch() {
+  const searchBox = document.getElementById('searchBox');
+  const noResultsEl = document.getElementById('noResults');
+  
+  searchBox.addEventListener('input', () => {
+    const query = searchBox.value.toLowerCase().trim();
+    const entries = document.querySelectorAll('.entry');
+    let visibleCount = 0;
+
+    entries.forEach(entry => {
+      const entryText = entry.textContent.toLowerCase();
+      if (entryText.includes(query)) {
+        entry.style.display = 'block';
+        visibleCount++;
+      } else {
+        entry.style.display = 'none';
+      }
+    });
+
+    // Show or hide the "No results" message
+    if (visibleCount === 0 && entries.length > 0) {
+      noResultsEl.style.display = 'block';
+    } else {
+      noResultsEl.style.display = 'none';
+    }
+  });
+}
+// --- END NEW SEARCH FUNCTION ---
+
 
 async function load() {
   const container = document.getElementById('list');
@@ -47,12 +121,12 @@ async function load() {
     container.innerHTML = "";
     if (!j.entries || j.entries.length === 0) {
       container.innerHTML = "<p>No verified entries yet.</p>";
+      document.getElementById('searchBox').style.display = 'none'; // Hide search if no entries
       return;
     }
     
     j.entries.forEach(e => {
       const div = document.createElement('div'); div.className = "entry";
-      // This is the direct download link format for Google Drive
       const audioLink = `https://drive.google.com/uc?export=download&id=${e.audioId}`;
 
       div.innerHTML = `
@@ -61,13 +135,21 @@ async function load() {
         <div class="translation"><b>English:</b> ${e.englishText}</div>
         ${e.frenchText ? `<div class="translation"><b>French:</b> ${e.frenchText}</div>` : ""}
         ${e.pronunciation ? `<div class="translation"><b>Pronunciation:</b> ${e.pronunciation}</div>` : ""}
+        ${e.notes ? `<div class="notes"><b>Notes:</b> ${e.notes}</div>` : ""}
         <div class="meta">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"} • ${new Date(e.timestamp).toLocaleString()}</div>
         ${e.audioId ? `<div style="margin-top:8px"><audio controls src="${audioLink}"></audio></div>` : ""}
       `;
       container.appendChild(div);
     });
+
+    // --- NEW ---
+    // After loading all entries, activate the search bar
+    setupSearch();
+    // --- END NEW ---
+
   } catch (err) {
     console.error("Load Error:", err);
     container.textContent = "Error loading dictionary: " + err.message;
   }
-}load();</script></body></html>
+}
+load();</script></body></html>

@@ -1,7 +1,7 @@
 <!doctype html><html><head>
   <meta charset="utf-8">
   <title>Voices of the Land — Dictionary (Cree)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale:1" />
   <style>
     :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--muted:#6b5847;}
     body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:20px;margin:0;}
@@ -9,6 +9,7 @@
     h1{color:var(--accent);margin:0 0 8px}
     .entry{border-bottom:1px dashed #e7ded4;padding:12px 0}
     .word{font-size:18px;font-weight:700;color:#3f2b20}
+    .syllabics{font-size:20px;font-weight:500;color:#3f2b20;margin-top:4px;}
     .meta{font-size:13px;color:#7a6a5f;margin-top:6px}
     .translation{margin-top:6px; padding-left: 10px;}
     audio{margin-top:8px;width:100%}
@@ -31,32 +32,42 @@
     <p class="meta">Compiled entries verified by community Elders. If you submitted a word, check with Elders for publication status.</p>
     <div id="list">Loading...</div>
   </div><script>
-/* === THIS IS THE FIX === */
-/* I have put your new, working /exec link here */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzAJa41a0Tuk0Ju_UvMZp_kjXHsBGH0c8oAYrO_lJLT9ePbRjCyOHwLg4eH72qI-eRuCQ/exec?cmd=listVerified";
-/* === END FIX === */
+    // --- THIS IS YOUR WORKING LINK ---
+    // You must use the link from your most recent, successful deployment
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw27lNpaPmfAktNrBl3eZgQ-xA2xDkMhiC7-_KCfk9RLKdxAE_y_BBFP-ulPC3oO1zHpg/exec?cmd=listVerified";
+    // --- END LINK ---
 
 async function load() {
+  const container = document.getElementById('list');
   try {
     const resp = await fetch(WEB_APP_URL);
+    if (!resp.ok) { throw new Error(`HTTP error! Status: ${resp.status}`); }
     const j = await resp.json();
-    const container = document.getElementById('list');
+    
     container.innerHTML = "";
     if (!j.entries || j.entries.length === 0) {
       container.innerHTML = "<p>No verified entries yet.</p>";
       return;
     }
+    
     j.entries.forEach(e => {
       const div = document.createElement('div'); div.className = "entry";
-      div.innerHTML = `<div class="word">${e.indigenousText}</div>
+      // This is the direct download link format for Google Drive
+      const audioLink = `https://drive.google.com/uc?export=download&id=${e.audioId}`;
+
+      div.innerHTML = `
+        <div class="word">${e.indigenousText}</div>
+        ${e.syllabics ? `<div class="syllabics">${e.syllabics}</div>` : ""}
         <div class="translation"><b>English:</b> ${e.englishText}</div>
         ${e.frenchText ? `<div class="translation"><b>French:</b> ${e.frenchText}</div>` : ""}
+        ${e.pronunciation ? `<div class="translation"><b>Pronunciation:</b> ${e.pronunciation}</div>` : ""}
         <div class="meta">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"} • ${new Date(e.timestamp).toLocaleString()}</div>
-        ${e.audioUrl ? `<div style="margin-top:8px"><audio controls src="${e.audioUrl}"></audio></div>` : ""}
-        ${e.notes ? `<div style="margin-top:8px;font-size:14px">Notes: ${e.notes}</div>` : ""}`;
+        ${e.audioId ? `<div style="margin-top:8px"><audio controls src="${audioLink}"></audio></div>` : ""}
+      `;
       container.appendChild(div);
     });
   } catch (err) {
-    document.getElementById('list').textContent = "Error loading dictionary: " + err.toString();
+    console.error("Load Error:", err);
+    container.textContent = "Error loading dictionary: " + err.message;
   }
 }load();</script></body></html>

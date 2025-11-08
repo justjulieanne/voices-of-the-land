@@ -9,14 +9,11 @@
     .wrap{max-width:920px;margin:0 auto;background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.05); display: none;}
     h1{color:var(--accent);margin:0 0 8px}
     .entry{border:1px solid #e6dcd1;padding:12px;border-radius:8px;margin-bottom:10px}
-    
-    /* Button styles */
-    .btn-container{margin-top:10px; display:flex; gap: 8px;}
-    button{border:none;padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600;}
+    .entry-buttons{margin-top:10px;display:flex;gap:8px;}
+    button{background:var(--accent);color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer}
+    button.decline{background-color:transparent;color:var(--accent-2);border:1px solid var(--accent-2);}
     button:disabled{background-color:#ccc;cursor:not-allowed;}
-    .btn-verify{background:var(--accent);color:white;}
-    .btn-decline{background:transparent;color:var(--accent-2);border:1px solid var(--accent-2);} /* <-- NEW BUTTON STYLE */
-
+    .secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
     .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
     .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
@@ -35,15 +32,16 @@
     </nav>
     
     <h1>Pending Submissions — Elder Review</h1>
-    <p class="muted">Use this page to verify entries. Marking "Verified" publishes the item to the public dictionary. "Decline" permanently deletes the submission.</p>
+    <p class="muted">Use this page to verify or decline entries. Verifying publishes the item to the public dictionary. Declining deletes it permanently.</p>
     <div id="list">Loading...</div>
   </div>
 
-  <div id="errorMessage">Access Denied.</div>
+  <div id="errorMessage" style="padding:20px;text-align:center;font-weight:600;color:var(--accent-2);display:none;">Access Denied.</div>
 
 <script>
     // --- THIS IS YOUR WORKING LINK ---
-    const WEB_APP_BASE = "https://script.google.com/macros/s/AKfycbzbOlp3MgtQ20u3ZjFF7FvrMJotB9ZfoFTbbtfliezVY6k_W7ldud0pSLA0UoTw5TeYyQ/exec";
+    // You must use the link from your most recent, successful deployment
+    const WEB_APP_BASE = "https://script.google.com/macros/s/AKfycbw27lNpaPmfAktNrBl3eZgQ-xA2xDkMhiC7-_KCfk9RLKdxAE_y_BBFP-ulPC3oO1zHpg/exec";
     // --- END LINK ---
     
     const LIST_PENDING = WEB_APP_BASE + "?cmd=listPending";
@@ -58,7 +56,6 @@
         loadPending(); // Load data only if password is correct
       } else {
         document.getElementById('mainContent').style.display = 'none';
-        document.getElementById('errorMessage').textContent = "Access Denied.";
         document.getElementById('errorMessage').style.display = 'block';
       }
     }
@@ -68,9 +65,7 @@
       const container = document.getElementById('list');
       try {
         const resp = await fetch(LIST_PENDING);
-        if (!resp.ok) { // Check if response is not 200-299
-            throw new Error(`HTTP error! status: ${resp.status}`);
-        }
+        if (!resp.ok) { throw new Error(`HTTP error! Status: ${resp.status}`); }
         const j = await resp.json();
         
         container.innerHTML = "";
@@ -81,116 +76,100 @@
         
         j.entries.forEach(e => {
           const div = document.createElement('div'); div.className = "entry";
-          
-          // --- THIS IS THE AUDIO FIX ---
-          // We now build a direct download link from the audioId
-          const audioPlayer = e.audioId 
-            ? `<div style="margin-top:8px"><audio controls src="https://drive.google.com/uc?id=${e.audioId}"></audio></div>` 
-            : "";
-          // --- END AUDIO FIX ---
+          const audioLink = `https://drive.google.com/uc?export=download&id=${e.audioId}`;
 
           div.innerHTML = `
             <div style="font-weight:700">${e.indigenousText}</div>
+            ${e.syllabics ? `<div style="font-size:18px;margin-top:4px;">${e.syllabics}</div>` : ""}
             <div style="margin-top:4px"><b>English:</b> ${e.englishText}</div>
             ${e.frenchText ? `<div style="margin-top:4px"><b>French:</b> ${e.frenchText}</div>` : ""}
+            ${e.pronunciation ? `<div style="margin-top:4px"><b>Pronunciation:</b> ${e.pronunciation}</div>` : ""}
             <div style="margin-top:6px; font-size: 14px;">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"}</div>
-            ${audioPlayer} 
-            ${e.notes ? `<div style="margin-top:8px">Notes: ${e.notes}</div>` : ""}
-            <div class="btn-container">
-              <button class="btn-verify" data-row="${e.rowIndex}">Verify (publish)</button>
-              <button class="btn-decline" data-row="${e.rowIndex}">Decline (delete)</button>
+            ${e.audioId ? `<div style="margin-top:8px"><audio controls src="${audioLink}"></audio></div>` : ""}
+            <div class="entry-buttons">
+                <button class="verify-btn" data-row="${e.rowIndex}">Verify (publish)</button>
+                <button class="decline-btn decline" data-row="${e.rowIndex}">Decline (delete)</button>
             </div>`;
           container.appendChild(div);
         });
 
-        // Add event listeners to all new "Verify" buttons
-        container.querySelectorAll('button.btn-verify').forEach(b => {
-          b.onclick = async () => {
-            const isConfirmed = confirm("Are you sure you want to verify and PUBLISH this entry?");
-            if (!isConfirmed) { return; }
-
-            const row = b.getAttribute('data-row');
-            b.disabled = true;
-            b.textContent = "Verifying...";
-            b.closest('.btn-container').querySelector('.btn-decline').disabled = true;
-
-            try {
-              const resp = await fetch(WEB_APP_BASE, {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ action: "verify", rowIndex: row })
-              });
-              if (!resp.ok) {
-                  throw new Error(`HTTP error! status: ${resp.status}`);
-              }
-              const j2 = await resp.json();
-              if (j2.success) {
-                b.textContent = "Verified ✓";
-                setTimeout(loadPending, 600); // Refresh list
-              } else {
-                b.textContent = "Error";
-                b.disabled = false;
-                b.closest('.btn-container').querySelector('.btn-decline').disabled = false;
-                alert("Error: " + (j2.message || JSON.stringify(j2)));
-              }
-            } catch (err) {
-              b.textContent = "Error";
-              b.disabled = false;
-              b.closest('.btn-container').querySelector('.btn-decline').disabled = false;
-              console.error("Verify Error:", err);
-              alert("Network error: " + err.toString());
-            }
-          };
-        });
-
-        // --- NEW EVENT LISTENER FOR DECLINE BUTTONS ---
-        container.querySelectorAll('button.btn-decline').forEach(b => {
-          b.onclick = async () => {
-            const isConfirmed = confirm("Are you sure you want to decline and PERMANENTLY DELETE this entry? This cannot be undone.");
-            if (!isConfirmed) { return; }
-
-            const row = b.getAttribute('data-row');
-            b.disabled = true;
-            b.textContent = "Declining...";
-            b.closest('.btn-container').querySelector('.btn-verify').disabled = true;
-
-            try {
-              const resp = await fetch(WEB_APP_BASE, {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ action: "decline", rowIndex: row })
-              });
-              if (!resp.ok) {
-                  throw new Error(`HTTP error! status: ${resp.status}`);
-              }
-              const j2 = await resp.json();
-              if (j2.success) {
-                b.textContent = "Declined ✓";
-                setTimeout(loadPending, 600); // Refresh list
-              } else {
-                b.textContent = "Error";
-                b.disabled = false;
-                b.closest('.btn-container').querySelector('.btn-verify').disabled = false;
-                alert("Error: " + (j2.message || JSON.stringify(j2)));
-              }
-            } catch (err) {
-              b.textContent = "Error";
-              b.disabled = false;
-              b.closest('.btn-container').querySelector('.btn-verify').disabled = false;
-              console.error("Decline Error:", err);
-              alert("Network error: " + err.toString());
-            }
-          };
-        });
-        // --- END NEW LISTENER ---
+        // Attach event listeners after all entries are rendered
+        attachButtonListeners();
 
       } catch (err) {
-        console.error("Error loading pending submissions:", err);
-        container.innerHTML = `<p>Error loading pending submissions: ${err.message}. Please check console and refresh.</p>`;
+        console.error("Load Error:", err);
+        container.textContent = "Error loading pending submissions: " + err.message;
       }
+    }
+
+    function attachButtonListeners() {
+        // Handle Verify
+        document.querySelectorAll('.verify-btn').forEach(b => {
+            b.onclick = async () => {
+                const row = b.getAttribute('data-row');
+                const isConfirmed = confirm("Are you sure you want to verify and publish this entry?");
+                if (!isConfirmed) { return; }
+
+                b.disabled = true;
+                b.textContent = "Verifying...";
+                await handleAdminAction("verify", row, b, "Verified ✓");
+            };
+        });
+
+        // Handle Decline
+        document.querySelectorAll('.decline-btn').forEach(b => {
+            b.onclick = async () => {
+                const row = b.getAttribute('data-row');
+                const isConfirmed = confirm("Are you sure you want to PERMANENTLY DELETE this entry?");
+                if (!isConfirmed) { return; }
+
+                b.disabled = true;
+                b.textContent = "Declining...";
+                await handleAdminAction("decline", row, b, "Declined & Deleted");
+            };
+        });
+    }
+
+    async function handleAdminAction(action, rowIndex, buttonEl, successText) {
+        try {
+            const resp = await fetch(WEB_APP_BASE, {
+                method: "POST",
+                headers: {"Content-Type":"text/plain;charset=utf-8"},
+                body: JSON.stringify({ action: action, rowIndex: rowIndex })
+            });
+
+            if (!resp.ok) { throw new Error(`HTTP error! Status: ${resp.status}`); }
+            
+            const j2 = await resp.json();
+            
+            if (j2.success) {
+                buttonEl.textContent = successText;
+                // Find the whole entry div and fade it out
+                const entryDiv = buttonEl.closest('.entry');
+                if (entryDiv) {
+                    entryDiv.style.transition = 'opacity 0.5s ease';
+                    entryDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        entryDiv.remove();
+                        // Check if list is empty
+                        if (!document.querySelector('.entry')) {
+                            document.getElementById('list').innerHTML = "<p>No pending submissions.</p>";
+                        }
+                    }, 500); // Remove after fade out
+                }
+            } else {
+                buttonEl.textContent = "Error";
+                buttonEl.disabled = false;
+                alert("Error: " + (j2.message || JSON.stringify(j2)));
+            }
+        } catch (err) {
+            console.error("Admin Action Error:", err);
+            buttonEl.textContent = "Error";
+            buttonEl.disabled = false;
+            alert(`Action failed. Please check your internet connection. (Error: ${err.message})`);
+        }
     }
 
     // Run the password check as soon as the page loads
     checkPassword();
-</script>
-</body></html>
+</script></body></html>

@@ -1,29 +1,101 @@
+<!doctype html>
+<html>
+<head>
   <meta charset="utf-8" />
-
+  <title>Voices of the Land — Home</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--accent-2:#b33a2a;--muted:#6b5847;}
-    body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:22px;margin:0;}
-    .wrap{max-width:720px;margin:0 auto;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.06);}
-    h1{color:var(--accent);margin:0 0 10px;font-size:24px;}
-    p{line-height:1.6;}
-    .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
-    .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
-    .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
-    .main-nav a:hover{background-color:var(--accent-2);}
-    .cta-buttons{margin-top:20px;display:flex;gap:12px;}
-    .cta-buttons a{display:inline-block;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:600;}
-    .cta-primary{background-color:var(--accent);color:white;}
-    .cta-secondary{background-color:transparent;color:var(--accent);border:1px solid var(--accent);}
+    :root {
+      --bg:#f5efe6;
+      --card:#fff9f2;
+      --accent:#8a4b2a;
+      --accent-2:#b33a2a;
+      --muted:#6b5847;
+    }
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--muted);
+      padding: 22px;
+      margin: 0;
+    }
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      background: var(--card);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+    h1 {
+      color: var(--accent);
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+    h3 { color: var(--accent); }
+    p { line-height: 1.6; }
+
+    /* --- Navigation styling (copied from submit page) --- */
+    .main-nav {
+      background-color: var(--accent);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .main-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .main-nav a {
+      display: block;
+      padding: 12px 18px;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .main-nav a:hover {
+      background-color: var(--accent-2);
+    }
+
+    .cta-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .cta-buttons a {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .cta-primary {
+      background-color: var(--accent);
+      color: white;
+    }
+    .cta-secondary {
+      background-color: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
   </style>
+</head>
+<body>
   <div class="wrap">
-    
+    <nav class="main-nav">
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="submit.html">Submit a Word</a></li>
         <li><a href="dictionary.html">Public Dictionary</a></li>
         <li><a href="admin.html">Admin Review</a></li>
       </ul>
+    </nav>
    
     
     <h1>Welcome to Voices of the Land</h1>

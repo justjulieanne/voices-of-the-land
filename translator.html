@@ -36,20 +36,22 @@
       font-size: 16px;
       box-sizing: border-box;
     }
-    #noResults {
-      display: none;
+    #noResults, #initialPrompt {
+      display: none; /* Hidden by default */
       padding: 15px;
       font-weight: 600;
       color: var(--accent);
+      text-align: center;
     }
     
-    /* NEW Translator Card Styles */
+    /* Translator Card Styles */
     .translator-card {
       border: 1px solid #e6dcd1;
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 12px;
       background: #fff;
+      display: none; /* Hidden by default for search-first */
     }
     .translator-card .lang-block {
       margin-bottom: 8px;
@@ -79,19 +81,27 @@
       width: 100%;
       border-collapse: collapse;
       text-align: center;
+      table-layout: fixed;
     }
     .syllabics-chart th, .syllabics-chart td {
       border: 1px solid #e6dcd1;
       padding: 8px;
-      font-size: 14px;
+      font-size: 12px;
     }
     .syllabics-chart th {
       background-color: var(--card);
       font-weight: 700;
     }
+    
+    /* Interactive Chart Styles */
     .syllabics-chart .syllabic-char {
-      font-size: 20px;
+      font-size: 18px;
       color: #333;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .syllabics-chart .syllabic-char:hover {
+      background-color: var(--card);
     }
 
   </style></head><body>
@@ -111,17 +121,18 @@
     
     <input type="text" id="searchBox" placeholder="Search (English, French, Cree, or Syllabics)...">
 
-    <div id="list">Loading dictionary...</div>
+    <!-- THIS IS THE FIX: Added the missing initialPrompt div -->
+    <div id="initialPrompt" style="display: block;">Please enter a search term to see results.</div>
     <div id="noResults">No entries match your search.</div>
+    <div id="list"></div> <!-- This is where cards will be added -->
 
     <!-- Syllabics Chart -->
     <div class="syllabics-chart">
-      <h2>Syllabics Reference Chart</h2>
+      <h2>Swampy Cree Syllabics Chart</h2>
       <table>
         <thead>
           <tr>
             <th></th>
-            <th>-e</th>
             <th>-ē</th>
             <th>-i</th>
             <th>-ī</th>
@@ -136,219 +147,72 @@
           <tr>
             <th>(vowel)</th>
             <td class="syllabic-char">ᐁ</td>
-            <td class="syllabic-char">ᐁ</td>
             <td class="syllabic-char">ᐃ</td>
-            <td class="syllabic-char">ᐃ</td>
+            <td class="syllabic-char">ᐄ</td>
             <td class="syllabic-char">ᐅ</td>
-            <td class="syllabic-char">ᐅ</td>
+            <td class="syllabic-char">ᐆ</td>
             <td class="syllabic-char">ᐊ</td>
-            <td class="syllabic-char">ᐊ</td>
+            <td class="syllabic-char">ᐋ</td>
             <td></td>
+          </tr>
+          <tr>
+            <th>w-</th>
+            <td class="syllabic-char">ᐍ</td>
+            <td class="syllabic-char">ᐏ</td>
+            <td class="syllabic-char">ᐑ</td>
+            <td class="syllabic-char">ᐓ</td>
+            <td class="syllabic-char">ᐕ</td>
+            <td class="syllabic-char">ᐘ</td>
+            <td class="syllabic-char">ᐚ</td>
+            <td class="syllabic-char">ᐤ</td>
           </tr>
           <tr>
             <th>p-</th>
             <td class="syllabic-char">ᐯ</td>
-            <td class="syllabic-char">ᐯ</td>
             <td class="syllabic-char">ᐱ</td>
-            <td class="syllabic-char">ᐱ</td>
+            <td class="syllabic-char">ᐲ</td>
             <td class="syllabic-char">ᐳ</td>
-            <td class="syllabic-char">ᐳ</td>
+            <td class="syllabic-char">ᐴ</td>
             <td class="syllabic-char">ᐸ</td>
-            <td class="syllabic-char">ᐸ</td>
+            <td class="syllabic-char">ᐹ</td>
             <td class="syllabic-char">ᑊ</td>
           </tr>
           <tr>
             <th>t-</th>
             <td class="syllabic-char">ᑌ</td>
-            <td class="syllabic-char">ᑌ</td>
             <td class="syllabic-char">ᑎ</td>
-            <td class="syllabic-char">ᑎ</td>
+            <td class="syllabic-char">ᑏ</td>
             <td class="syllabic-char">ᑐ</td>
-            <td class="syllabic-char">ᑐ</td>
+            <td class="syllabic-char">ᑑ</td>
             <td class="syllabic-char">ᑕ</td>
-            <td class="syllabic-char">ᑕ</td>
+            <td class="syllabic-char">ᑖ</td>
             <td class="syllabic-char">ᐟ</td>
           </tr>
           <tr>
             <th>k-</th>
             <td class="syllabic-char">ᑫ</td>
-            <td class="syllabic-char">ᑫ</td>
             <td class="syllabic-char">ᑭ</td>
-            <td class="syllabic-char">ᑭ</td>
+            <td class="syllabic-char">ᑮ</td>
             <td class="syllabic-char">ᑯ</td>
-            <td class="syllabic-char">ᑯ</td>
+            <td class="syllabic-char">ᑰ</td>
             <td class="syllabic-char">ᑲ</td>
-            <td class="syllabic-char">ᑲ</td>
+            <td class="syllabic-char">ᑳ</td>
             <td class="syllabic-char">ᐠ</td>
           </tr>
           <tr>
-            <th>ch-</th>
-            <td class="syllabic-char">ᒉ</td>
+            <th>c-</th>
             <td class="syllabic-char">ᒉ</td>
             <td class="syllabic-char">ᒋ</td>
-            <td class="syllabic-char">ᒋ</td>
+            <td class="syllabic-char">ᒌ</td>
             <td class="syllabic-char">ᒍ</td>
-            <td class="syllabic-char">ᒍ</td>
+            <td class="syllabic-char">ᒎ</td>
             <td class="syllabic-char">ᒐ</td>
-            <td class="syllabic-char">ᒐ</td>
+            <td class="syllabic-char">ᒑ</td>
             <td class="syllabic-char">ᐨ</td>
           </tr>
           <tr>
             <th>m-</th>
             <td class="syllabic-char">ᒣ</td>
-            <td class="syllabic-char">ᒣ</td>
             <td class="syllabic-char">ᒥ</td>
-            <td class="syllabic-char">ᒥ</td>
-            <td class="syllabic-char">ᒧ</td>
-            <td class="syllabic-char">ᒧ</td>
-            <td class="syllabic-char">ᒪ</td>
-            <td class="syllabic-char">ᒪ</td>
-            <td class="syllabic-char">ᒼ</td>
-          </tr>
-          <tr>
-            <th>n-</th>
-            <td class="syllabic-char">ᓀ</td>
-            <td class="syllabic-char">ᓀ</td>
-            <td class="syllabic-char">ᓂ</td>
-            <td class="syllabic-char">ᓂ</td>
-            <td class="syllabic-char">ᓄ</td>
-            <td class="syllabic-char">ᓄ</td>
-            <td class="syllabic-char">ᓇ</td>
-            <td class="syllabic-char">ᓇ</td>
-            <td class="syllabic-char">ᐣ</td>
-          </tr>
-          <tr>
-            <th>s-</th>
-            <td class="syllabic-char">ᓭ</td>
-            <td class="syllabic-char">ᓭ</td>
-            <td class="syllabic-char">ᓯ</td>
-            <td class="syllabic-char">ᓯ</td>
-            <td class="syllabic-char">ᓱ</td>
-            <td class="syllabic-char">ᓱ</td>
-            <td class="syllabic-char">ᓴ</td>
-            <td class="syllabic-char">ᓴ</td>
-            <td class="syllabic-char">ᐢ</td>
-          </tr>
-          <tr>
-            <th>y-</th>
-            <td class="syllabic-char">ᔦ</td>
-            <td class="syllabic-char">ᔦ</td>
-            <td class="syllabic-char">ᔨ</td>
-            <td class="syllabic-char">ᔨ</td>
-            <td class="syllabic-char">ᔪ</td>
-            <td class="syllabic-char">ᔪ</td>
-            <td class="syllabic-char">ᔭ</td>
-            <td class="syllabic-char">ᔭ</td>
-            <td class="syllabic-char">ᐧ</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div><script>
-    // --- THIS IS YOUR WORKING LINK ---
-    // You must use the link from your most recent, successful deployment
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw27lNpaPmfAktNrBl3eZgQ-xA2xDkMhiC7-_KCfk9RLKdxAE_y_BBFP-ulPC3oO1zHpg/exec?cmd=listVerified";
-    // --- END LINK ---
-
-// --- SEARCH FUNCTION ---
-function setupSearch(entries) {
-  const searchBox = document.getElementById('searchBox');
-  const noResultsEl = document.getElementById('noResults');
-  const container = document.getElementById('list');
-  
-  searchBox.addEventListener('input', () => {
-    const query = searchBox.value.toLowerCase().trim();
-    let visibleCount = 0;
-    
-    // Clear the list
-    container.innerHTML = "";
-
-    // Filter and build new cards
-    const filteredEntries = entries.filter(e => {
-        return (e.indigenousText && e.indigenousText.toLowerCase().includes(query)) ||
-               (e.syllabics && e.syllabics.toLowerCase().includes(query)) ||
-               (e.englishText && e.englishText.toLowerCase().includes(query)) ||
-               (e.frenchText && e.frenchText.toLowerCase().includes(query)) ||
-               (e.pronunciation && e.pronunciation.toLowerCase().includes(query));
-    });
-
-    filteredEntries.forEach(e => {
-        const div = createEntryCard(e);
-        container.appendChild(div);
-        visibleCount++;
-    });
-
-    // Show or hide the "No results" message
-    if (visibleCount === 0 && entries.length > 0) {
-      noResultsEl.style.display = 'block';
-    } else {
-      noResultsEl.style.display = 'none';
-    }
-  });
-}
-// --- END SEARCH FUNCTION ---
-
-// --- NEW Card Builder ---
-function createEntryCard(e) {
-  const div = document.createElement('div');
-  div.className = "translator-card";
-  
-  // Build the card HTML
-  div.innerHTML = `
-    <div class="lang-block">
-      <span class="lang-label">Cree (Roman):</span>
-      <span class="lang-text">${e.indigenousText || '...'}</span>
-    </div>
-    <div class="lang-block">
-      <span class="lang-label">Syllabics:</span>
-      <span class="lang-text syllabics">${e.syllabics || '...'}</span>
-    </div>
-    <div class="lang-block">
-      <span class="lang-label">English:</span>
-      <span class="lang-text">${e.englishText || '...'}</span>
-    </div>
-    <div class="lang-block">
-      <span class="lang-label">French:</span>
-      <span class="lang-text">${e.frenchText || '...'}</span>
-    </div>
-    <div class="lang-block">
-      <span class="lang-label">Pronunciation:</span>
-      <span class="lang-text">${e.pronunciation || '...'}</span>
-    </div>
-  `;
-  return div;
-}
-
-async function load() {
-  const container = document.getElementById('list');
-  try {
-    const resp = await fetch(WEB_APP_URL);
-    if (!resp.ok) { throw new Error(`HTTP error! Status: ${resp.status}`); }
-    const j = await resp.json();
-    
-    container.innerHTML = "";
-    if (!j.entries || j.entries.length === 0) {
-      container.innerHTML = "<p>No verified entries yet.</p>";
-      document.getElementById('searchBox').style.display = 'none'; // Hide search if no entries
-      return;
-    }
-    
-    // Store entries for searching
-    const allEntries = j.entries;
-    
-    // Display all entries by default on first load
-    allEntries.forEach(e => {
-      const div = createEntryCard(e);
-      container.appendChild(div);
-    });
-
-    // Activate the search bar
-    setupSearch(allEntries);
-
-  } catch (err) {
-    console.error("Load Error:", err);
-    container.textContent = "Error loading dictionary: " + err.message;
-  }
-}
-load();</script></body></html>
+            <td class="syllabic-char">ᒦ</td>
+            <td class.

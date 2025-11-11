@@ -1,391 +1,743 @@
-<!doctype html><html><head>
-  <meta charset="utf-8">
-  <title>Voices of the Land — Translator</title>
-  <meta name="viewport" content="width=device-width,initial-scale:1" />
-  <style>
-    :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--muted:#6b5847;}
-    body{
-      font-family:Inter, Arial, sans-serif;
-      background-color:var(--bg);
-      color:var(--muted);
-      padding:20px;
-      margin:0;
-      /* Medicine Wheel Flower Background */
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 10 C20 10 20 20 30 30 C40 20 40 10 30 10' fill='%23FFFFFF' fill-opacity='0.7'/%3E%3Cpath d='M30 50 C20 50 20 40 30 30 C40 40 40 50 30 50' fill='%23B33A2A' fill-opacity='0.5'/%3E%3Cpath d='M10 30 C10 20 20 20 30 30 C20 40 10 40 10 30' fill='%23333333' fill-opacity='0.5'/%3E%3Cpath d='M50 30 C50 20 40 20 30 30 C40 40 50 40 50 30' fill='%23FFD700' fill-opacity='0.5'/%3E%3C/svg%3E");
-    }
-    .wrap{
-      max-width:900px;
-      margin:0 auto;
-      background: rgba(255, 249, 242, 0.98); /* 98% opacity */
-      padding:18px;
-      border-radius:12px;
-      box-shadow:0 6px 18px rgba(0,0,0,0.05)
-    }
-    h1, h2, h3 {color:var(--accent);margin:0 0 8px}
-    .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
-    .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
-    .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
-    .main-nav a:hover{background-color:var(--accent-2);}
-    
-    #searchBox {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 20px;
-      border: 1px solid #e6dcd1;
-      border-radius: 8px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    /* --- Styles for the prompts --- */
-    #noResults, #initialPrompt {
-      display: none; /* Hidden by default */
-      padding: 15px;
-      font-weight: 600;
-      color: var(--accent);
-      text-align: center;
-    }
-    
-    /* Translator Card Styles */
-    .translator-card {
-      border: 1px solid #e6dcd1;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      background: #fff;
-      display: none; /* Hidden by default for search-first */
-    }
-    .translator-card .lang-block {
-      margin-bottom: 8px;
-    }
-    .translator-card .lang-label {
-      font-weight: 700;
-      color: var(--accent);
-      display: block;
-      font-size: 14px;
-    }
-    .translator-card .lang-text {
-      font-size: 18px;
-      color: #333;
-      padding-left: 10px;
-    }
-    .translator-card .lang-text.syllabics {
-      font-size: 22px;
-    }
-    
-    /* Syllabics Chart Styles */
-    .syllabics-chart, .reference-list {
-      margin-top: 30px;
-      border-top: 2px dashed var(--accent);
-      padding-top: 15px;
-    }
-    .syllabics-chart table, .reference-list table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: center;
-      table-layout: fixed;
-    }
-    .syllabics-chart th, .syllabics-chart td, .reference-list th, .reference-list td {
-      border: 1px solid #e6dcd1;
-      padding: 8px;
-      font-size: 11px; /* Smaller font for better fit */
-    }
-    .syllabics-chart th, .reference-list th {
-      background-color: var(--card);
-      font-weight: 700;
-      font-size: 12px;
-    }
-    .reference-list table {
-      text-align: left;
-    }
-    .reference-list th {
-       width: 25%;
-    }
-    
-    /* Interactive Chart Styles */
-    .syllabics-chart .syllabic-char {
-      font-size: 16px;
-      color: #333;
-      cursor: pointer;
-      transition: background-color 0.2s;
-      -webkit-user-select: none; /* Prevent text selection on click */
-      -ms-user-select: none;
-      user-select: none;
-    }
-    .syllabics-chart .syllabic-char:hover {
-      background-color: var(--card);
-    }
-    /* --- NEW: Latin reference *inside* the chart --- */
-    .latin-ref {
-      font-size: 11px;
-      color: var(--muted);
-      display: block;
-      margin-top: 2px;
-    }
-    /* --- NEW: Style for non-interactive cells --- */
-    .latin-row td {
-      font-size: 11px;
-      color: var(--muted);
-      background-color: #fcfaf7;
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syllabary Chart</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Use Inter font */
+        body {
+            font-family: "Inter", sans-serif;
+        }
+        /* Custom styles for table cells to center content */
+        .chart-cell {
+            border: 1px solid #d1d5db; /* border-gray-300 */
+            padding: 0.5rem; /* p-2 */
+            text-align: center;
+            height: 6rem; /* h-24 */
+            vertical-align: top;
+            min-width: 4rem; /* Add min-width for better spacing */
+        }
+        .symbol-box {
+            font-size: 2.25rem; /* text-4xl */
+            font-weight: 300; /* font-light */
+            height: 3rem; /* h-12 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .transcription {
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* text-gray-600 */
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <h1 class="text-2xl font-bold p-6 text-center text-gray-800">Syllabary Chart</h1>
+        
+        <!-- Added Search Bar -->
+        <div class="p-4 md:px-6 md:pb-6">
+            <label for="syllabarySearch" class="sr-only">Search Translator</label>
+            <input type="text" id="syllabarySearch" placeholder="Type to search (e.g., 'kwe', 'ᑴ', 'ma')..." class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <!-- Table Header -->
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="chart-cell font-semibold">e</th>
+                        <th class="chart-cell font-semibold">i</th>
+                        <th class="chart-cell font-semibold">ii / î</th>
+                        <th class="chart-cell font-semibold">u / ū</th>
+                        <th class="chart-cell font-semibold">uu / û</th>
+                        <th class="chart-cell font-semibold">a</th>
+                        <th class="chart-cell font-semibold">aa / â</th>
+                        <th class="chart-cell font-semibold">(base)</th>
+                    </tr>
+                </thead>
+                <!-- Table Body -->
+                <tbody>
+                    <!-- Vowel Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐁ</div>
+                            <div class="transcription">e</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐃ</div>
+                            <div class="transcription">i</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐄ</div>
+                            <div class="transcription">ii / î</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐅ</div>
+                            <div class="transcription">u</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐆ</div>
+                            <div class="transcription">uu / û</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐊ</div>
+                            <div class="transcription">a</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐋ</div>
+                            <div class="transcription">aa / â</div>
+                        </td>
+                        <td class="chart-cell"></td>
+                    </tr>
+                    <!-- 'w' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐌ</div>
+                            <div class="transcription">we</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐎ</div>
+                            <div class="transcription">wi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐐ</div>
+                            <div class="transcription">wii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐒ</div>
+                            <div class="transcription">wu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐔ</div>
+                            <div class="transcription">wuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐗ</div>
+                            <div class="transcription">wa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐙ</div>
+                            <div class="transcription">waa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐤ</div>
+                            <div class="transcription">w</div>
+                        </td>
+                    </tr>
+                    <!-- 'h' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦᐁ</div>
+                            <div class="transcription">he</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦᐃ</div>
+                            <div class="transcription">hi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦᐄ</div>
+                            <div class="transcription">hii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦᐅ</div>
+                            <div class="transcription">hu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦᐆ</div>
+                            <div class="transcription">huu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦᐊ</div>
+                            <div class="transcription">ha</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦᐋ</div>
+                            <div class="transcription">haa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐦ</div>
+                            <div class="transcription">h</div>
+                        </td>
+                    </tr>
+                    <!-- 'p' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐯ</div>
+                            <div class="transcription">pe</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐱ</div>
+                            <div class="transcription">pi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐲ</div>
+                            <div class="transcription">pii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐳ</div>
+                            <div class="transcription">pu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐴ</div>
+                            <div class="transcription">puu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐸ</div>
+                            <div class="transcription">pa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᐹ</div>
+                            <div class="transcription">paa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑉ</div>
+                            <div class="transcription">p</div>
+                        </td>
+                    </tr>
+                    <!-- 't' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑌ</div>
+                            <div class="transcription">te</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑎ</div>
+                            <div class="transcription">ti</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑏ</div>
+                            <div class="transcription">tii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑐ</div>
+                            <div class="transcription">tu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑑ</div>
+                            <div class="transcription">tuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑕ</div>
+                            <div class="transcription">ta</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑖ</div>
+                            <div class="transcription">taa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑦ</div>
+                            <div class="transcription">t</div>
+                        </td>
+                    </tr>
+                    <!-- 'k' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑫ</div>
+                            <div class="transcription">ke</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑭ</div>
+                            <div class="transcription">ki</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑮ</div>
+                            <div class="transcription">kii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑯ</div>
+                            <div class="transcription">ku</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑰ</div>
+                            <div class="transcription">kuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑲ</div>
+                            <div class="transcription">ka</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑳ</div>
+                            <div class="transcription">kaa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒃ</div>
+                            <div class="transcription">k</div>
+                        </td>
+                    </tr>
+                    <!-- 'kw' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑴ</div>
+                            <div class="transcription">kwe</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑶ</div>
+                            <div class="transcription">kwi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑸ</div>
+                            <div class="transcription">kwii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑺ</div>
+                            <div class="transcription">kwu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑼ</div>
+                            <div class="transcription">kwuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᑾ</div>
+                            <div class="transcription">kwa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒀ</div>
+                            <div class="transcription">kwaa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒄ</div>
+                            <div class="transcription">kw</div>
+                        </td>
+                    </tr>
+                    <!-- 'ch' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒉ</div>
+                            <div class="transcription">che</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒋ</div>
+                            <div class="transcription">chi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒌ</div>
+                            <div class="transcription">chii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒍ</div>
+                            <div class="transcription">chu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒎ</div>
+                            <div class="transcription">chuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒐ</div>
+                            <div class="transcription">cha</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒑ</div>
+                            <div class="transcription">chaa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒡ</div>
+                            <div class="transcription">ch</div>
+                        </td>
+                    </tr>
+                    <!-- 'm' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒣ</div>
+                            <div class="transcription">me</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒥ</div>
+                            <div class="transcription">mi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒦ</div>
+                            <div class="transcription">mii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒧ</div>
+                            <div class="transcription">mu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒨ</div>
+                            <div class="transcription">muu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒪ</div>
+                            <div class="transcription">ma</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒫ</div>
+                            <div class="transcription">maa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒻ</div>
+                            <div class="transcription">m</div>
+                        </td>
+                    </tr>
+                    <!-- 'mw' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒬ</div>
+                            <div class="transcription">mwe</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒮ</div>
+                            <div class="transcription">mwi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒰ</div>
+                            <div class="transcription">mwii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒲ</div>
+                            <div class="transcription">mwu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒴ</div>
+                            <div class="transcription">mwuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒶ</div>
+                            <div class="transcription">mwa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒸ</div>
+                            <div class="transcription">mwaa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᒽ</div>
+                            <div class="transcription">mw</div>
+                        </td>
+                    </tr>
+                    <!-- 'n' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓀ</div>
+                            <div class="transcription">ne</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓂ</div>
+                            <div class="transcription">ni</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓃ</div>
+                            <div class="transcription">nii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓄ</div>
+                            <div class="transcription">nu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓅ</div>
+                            <div class="transcription">nuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓇ</div>
+                            <div class="transcription">na</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓈ</div>
+                            <div class="transcription">naa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓐ</div>
+                            <div class="transcription">n</div>
+                        </td>
+                    </tr>
+                    <!-- 's' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓭ</div>
+                            <div class="transcription">se</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓯ</div>
+                            <div class="transcription">si</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓰ</div>
+                            <div class="transcription">sii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓱ</div>
+                            <div class="transcription">su</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓲ</div>
+                            <div class="transcription">suu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓴ</div>
+                            <div class="transcription">sa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓵ</div>
+                            <div class="transcription">saa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔅ</div>
+                            <div class="transcription">s</div>
+                        </td>
+                    </tr>
+                    <!-- 'sh' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔐ</div>
+                            <div class="transcription">she</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔑ</div>
+                            <div class="transcription">shi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔒ</div>
+                            <div class="transcription">shii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔓ</div>
+                            <div class="transcription">shu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔔ</div>
+                            <div class="transcription">shuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔕ</div>
+                            <div class="transcription">sha</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔖ</div>
+                            <div class="transcription">shaa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔥ</div>
+                            <div class="transcription">sh</div>
+                        </td>
+                    </tr>
+                    <!-- 'y' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔦ</div>
+                            <div class="transcription">ye</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔨ</div>
+                            <div class="transcription">yi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔩ</div>
+                            <div class="transcription">yii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔪ</div>
+                            <div class="transcription">yu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔫ</div>
+                            <div class="transcription">yuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔭ</div>
+                            <div class="transcription">ya</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔮ</div>
+                            <div class="transcription">yaa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᔾ</div>
+                            <div class="transcription">y</div>
+                        </td>
+                    </tr>
+                    <!-- 'r' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕃ</div>
+                            <div class="transcription">re</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕆ</div>
+                            <div class="transcription">ri</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕇ</div>
+                            <div class="transcription">rii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕈ</div>
+                            <div class="transcription">ru</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕉ</div>
+                            <div class="transcription">ruu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕋ</div>
+                            <div class="transcription">ra</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕌ</div>
+                            <div class="transcription">raa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕐ</div>
+                            <div class="transcription">r</div>
+                        </td>
+                    </tr>
+                    <!-- 'l' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓓ</div>
+                            <div class="transcription">le</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓕ</div>
+                            <div class="transcription">li</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓖ</div>
+                            <div class="transcription">lii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓗ</div>
+                            <div class="transcription">lu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓘ</div>
+                            <div class="transcription">luu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓚ</div>
+                            <div class="transcription">la</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓛ</div>
+                            <div class="transcription">laa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᓪ</div>
+                            <div class="transcription">l</div>
+                        </td>
+                    </tr>
+                    <!-- 'f' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕓ</div>
+                            <div class="transcription">fe</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕕ</div>
+                            <div class="transcription">fi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕖ</div>
+                            <div class="transcription">fii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕗ</div>
+                            <div class="transcription">fu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕘ</div>
+                            <div class="transcription">fuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕙ</div>
+                            <div class="transcription">fa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕚ</div>
+                            <div class="transcription">faa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕝ</div>
+                            <div class="transcription">f</div>
+                        </td>
+                    </tr>
+                    <!-- 'th' Row -->
+                    <tr>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕞ</div>
+                            <div class="transcription">the</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕠ</div>
+                            <div class="transcription">thi</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕢ</div>
+                            <div class="transcription">thii</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕤ</div>
+                            <div class="transcription">thu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕥ</div>
+                            <div class="transcription">thuu</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕦ</div>
+                            <div class="transcription">tha</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕧ</div>
+                            <div class="transcription">thaa</div>
+                        </td>
+                        <td class="chart-cell">
+                            <div class="symbol-box">ᕪ</div>
+                            <div class="transcription">th</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-  </style></head><body>
-  <div class="wrap">
-    <nav class="main-nav">
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="submit.html">Submit a Word</a></li>
-        <li><a href="dictionary.html">Public Dictionary</a></li>
-        <li><a href="translator.html">Translator</a></li>
-        <li><a href="admin.html">Admin Review</a></li>
-      </ul>
-    </nav>
+    <!-- Added JavaScript for Search Functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('syllabarySearch');
+            const tableBody = document.querySelector('tbody');
+            if (!tableBody) return; // Guard clause
+            
+            const allRows = tableBody.querySelectorAll('tr');
 
-    <h1>East (James Bay) Cree Translator</h1>
-    <p class="meta">Search the verified community dictionary. This tool maps all available translations for a single word.</p>
-    
-    <input type="text" id="searchBox" placeholder="Search (English, French, Cree, or Syllabics)...">
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
 
-    <!-- THIS IS THE FIX: Added the missing initialPrompt div -->
-    <div id="initialPrompt" style="display: block;">Please enter a search term to see results.</div>
-    <div id="noResults">No entries match your search.</div>
-    <div id="list"></div> <!-- This is where cards will be added -->
+                allRows.forEach(row => {
+                    let rowHasMatch = false;
+                    const cells = row.querySelectorAll('.chart-cell');
 
-    <!-- Syllabics Chart -->
-    <div class="syllabics-chart">
-      <h2>East (James Bay) Cree Syllabics Chart (Īyiyū Ayimūn | ᐄᔨᔫ ᐊᔨᒨᓐ)</h2>
-      <!-- This is the new 36-row chart, transcribed from your images, with the first column removed -->
-      <table>
-        <thead>
-          <tr>
-            <th>-e</th>
-            <th>-i</th>
-            <th>-ii/î</th>
-            <th>-u</th>
-            <th>-uu/û</th>
-            <th>-a</th>
-            <th>-aa/â</th>
-            <th>Final</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="syllabic-char">ᐁ</td>
-            <td class="syllabic-char">ᐃ</td>
-            <td class="syllabic-char">ᐄ</td>
-            <td class="syllabic-char">ᐅ</td>
-            <td class="syllabic-char">ᐆ</td>
-            <td class="syllabic-char">ᐊ</td>
-            <td class="syllabic-char">ᐋ</td>
-            <td></td>
-          </tr>
-          <tr class="latin-row">
-            <td>e</td>
-            <td>i</td>
-            <td>ii/î</td>
-            <td>u</td>
-            <td>uu/û</td>
-            <td>a</td>
-            <td>aa/â</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᐌ</td>
-            <td class="syllabic-char">ᐎ</td>
-            <td class="syllabic-char">ᐐ</td>
-            <td class="syllabic-char">ᐒ</td>
-            <td class="syllabic-char">ᐔ</td>
-            <td class="syllabic-char">ᐗ</td>
-            <td class="syllabic-char">ᐙ</td>
-            <td class="syllabic-char">ᐤ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>we</td>
-            <td>wi</td>
-            <td>wii</td>
-            <td>wu</td>
-            <td>wuu</td>
-            <td>wa</td>
-            <td>waa</td>
-            <td>w</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᐦᐁ</td>
-            <td class="syllabic-char">ᐦᐃ</td>
-            <td class="syllabic-char">ᐦᐄ</td>
-            <td class="syllabic-char">ᐦᐅ</td>
-            <td class="syllabic-char">ᐦᐆ</td>
-            <td class="syllabic-char">ᐦᐊ</td>
-            <td class="syllabic-char">ᐦᐋ</td>
-            <td class="syllabic-char">ᐦ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>he</td>
-            <td>hi</td>
-            <td>hii</td>
-            <td>hu</td>
-            <td>huu</td>
-            <td>ha</td>
-            <td>haa</td>
-            <td>h</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᐯ</td>
-            <td class="syllabic-char">ᐱ</td>
-            <td class="syllabic-char">ᐲ</td>
-            <td class="syllabic-char">ᐳ</td>
-            <td class="syllabic-char">ᐴ</td>
-            <td class="syllabic-char">ᐸ</td>
-            <td class="syllabic-char">ᐹ</td>
-            <td class="syllabic-char">ᑉ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>pe</td>
-            <td>pi</td>
-            <td>pii</td>
-            <td>pu</td>
-            <td>puu</td>
-            <td>pa</td>
-            <td>paa</td>
-            <td>p</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᑌ</td>
-            <td class="syllabic-char">ᑎ</td>
-            <td class="syllabic-char">ᑏ</td>
-            <td class="syllabic-char">ᑐ</td>
-            <td class="syllabic-char">ᑑ</td>
-            <td class="syllabic-char">ᑕ</td>
-            <td class="syllabic-char">ᑖ</td>
-            <td class="syllabic-char">ᑦ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>te</td>
-            <td>ti</td>
-            <td>tii</td>
-            <td>tu</td>
-            <td>tuu</td>
-            <td>ta</td>
-            <td>taa</td>
-            <td>t</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᑫ</td>
-            <td class="syllabic-char">ᑭ</td>
-            <td class="syllabic-char">ᑮ</td>
-            <td class="syllabic-char">ᑯ</td>
-            <td class="syllabic-char">ᑰ</td>
-            <td class="syllabic-char">ᑲ</td>
-            <td class="syllabic-char">ᑳ</td>
-            <td class="syllabic-char">ᒃ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>ke</td>
-            <td>ki</td>
-            <td>kii</td>
-            <td>ku</td>
-            <td>kuu</td>
-            <td>ka</td>
-            <td>kaa</td>
-            <td>k</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᑴ</td>
-            <td class="syllabic-char">ᑶ</td>
-            <td class="syllabic-char">ᑸ</td>
-            <td class="syllabic-char">ᑺ</td>
-            <td class="syllabic-char">ᑼ</td>
-            <td class="syllabic-char">ᑾ</td>
-            <td class="syllabic-char">ᒀ</td>
-            <td class="syllabic-char">ᒄ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>kwe</td>
-            <td>kwi</td>
-            <td>kwii</td>
-            <td>kwu</td>
-            <td>kwuu</td>
-            <td>kwa</td>
-            <td>kwaa</td>
-            <td>kw</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᒉ</td>
-            <td class="syllabic-char">ᒋ</td>
-            <td class="syllabic-char">ᒌ</td>
-            <td class="syllabic-char">ᒍ</td>
-            <td class="syllabic-char">ᒎ</td>
-            <td class="syllabic-char">ᒐ</td>
-            <td class="syllabic-char">ᒑ</td>
-            <td class="syllabic-char">ᒡ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>che</td>
-            <td>chi</td>
-            <td>chii</td>
-            <td>chu</td>
-            <td>chuu</td>
-            <td>cha</td>
-            <td>chaa</td>
-            <td>ch</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᒣ</td>
-            <td class="syllabic-char">ᒥ</td>
-            <td class="syllabic-char">ᒦ</td>
-            <td class="syllabic-char">ᒧ</td>
-            <td class="syllabic-char">ᒨ</td>
-            <td class="syllabic-char">ᒪ</td>
-            <td class="syllabic-char">ᒫ</td>
-            <td class="syllabic-char">ᒻ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>me</td>
-            <td>mi</td>
-            <td>mii</td>
-            <td>mu</td>
-            <td>muu</td>
-            <td>ma</td>
-            <td>maa</td>
-            <td>m</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᒬ</td>
-            <td class="syllabic-char">ᒮ</td>
-            <td class="syllabic-char">ᒰ</td>
-            <td class="syllabic-char">ᒲ</td>
-            <td class="syllabic-char">ᒴ</td>
-            <td class="syllabic-char">ᒶ</td>
-            <td class="syllabic-char">ᒸ</td>
-            <td class="syllabic-char">ᒽ</td>
-          </tr>
-          <tr class="latin-row">
-            <td>mwe</td>
-            <td>mwi</td>
-            <td>mwii</td>
-            <td>mwu</td>
-            <td>mwuu</td>
-            <td>mwa</td>
-            <td>mwaa</td>
-            <td>mw</td>
-          </tr>
-          <tr>
-            <td class="syllabic-char">ᓀ</td>
-            <td class="syllabic-char">ᓂ</td>
-            <td class="syllabic-char">ᓃ</td>
-            <td class="syllabic-char">ᓄ</td>
-            <td class="syllabic-char">ᓅ</td>
-            <td class="syllabic-char">ᓇ</td>
-            <td class="syllabic-char">ᓈᓐ</td>
-            <td class="syllabic-char">ᓐ</td>
-     </tr>
-          <tr class="latin-row">
-            <td>ne</td>
-            <td>ni</td>
-            <td>nii</td>
-            <td>nu</td>
-            <td>nuu</td>
-            <td>na</td>
-            <td>naa</td>
-            <td>n</td>
+                    cells.forEach(cell => {
+                        // Get text content from both symbol and transcription
+                        const symbolText = cell.querySelector('.symbol-box')?.textContent.toLowerCase() || '';
+                        const transcriptionText = cell.querySelector('.transcription')?.textContent.toLowerCase() || '';
 
-</script></body></html>
+                        // Check if either the symbol or transcription includes the search term
+                        const cellMatches = symbolText.includes(searchTerm) || transcriptionText.includes(searchTerm);
+
+                        if (cellMatches && searchTerm !== '') {
+                            rowHasMatch = true;
+                            // Add highlight to matching cell
+                            cell.classList.add('bg-yellow-100');
+                        } else {
+                            // Remove highlight from non-matching cell or if search is empty
+                            cell.classList.remove('bg-yellow-100');
+                        }
+                    });
+
+                    // Show or hide the entire row based on whether any cell matched
+                    if (rowHasMatch || searchTerm === '') {
+                        row.style.display = ''; // Show row if it matches or if search is empty
+                    } else {
+                        row.style.display = 'none'; // Hide row if no cell matches
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

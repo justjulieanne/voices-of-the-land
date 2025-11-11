@@ -10,10 +10,8 @@
       color:var(--muted);
       padding:20px;
       margin:0;
-      /* --- THIS IS THE NEW ARTWORK --- */
-      /* White (Top), Black (Left), Red (Bottom), Yellow (Right) */
+      /* Medicine Wheel Flower Background */
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 10 C20 10 20 20 30 30 C40 20 40 10 30 10' fill='%23FFFFFF' fill-opacity='0.7'/%3E%3Cpath d='M30 50 C20 50 20 40 30 30 C40 40 40 50 30 50' fill='%23B33A2A' fill-opacity='0.5'/%3E%3Cpath d='M10 30 C10 20 20 20 30 30 C20 40 10 40 10 30' fill='%23333333' fill-opacity='0.5'/%3E%3Cpath d='M50 30 C50 20 40 20 30 30 C40 40 50 40 50 30' fill='%23FFD700' fill-opacity='0.5'/%3E%3C/svg%3E");
-      /* --- END ARTWORK --- */
     }
     .wrap{
       max-width:900px;
@@ -61,6 +59,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="submit.html">Submit a Word</a></li>
         <li><a href="dictionary.html">Public Dictionary</a></li>
+        <li><a href="translator.html">Translator</a></li>
         <li><a href="admin.html">Admin Review</a></li>
       </ul>
     </nav>
@@ -129,13 +128,17 @@ async function load() {
       const div = document.createElement('div'); div.className = "entry";
       const audioLink = `https://drive.google.com/uc?export=download&id=${e.audioId}`;
 
+      // This code now correctly matches the 12-column sheet
       div.innerHTML = `
         <div class="word">${e.indigenousText}</div>
         ${e.syllabics ? `<div class="syllabics">${e.syllabics}</div>` : ""}
         <div class="translation"><b>English:</b> ${e.englishText}</div>
         ${e.frenchText ? `<div class="translation"><b>French:</b> ${e.frenchText}</div>` : ""}
         ${e.pronunciation ? `<div class="translation"><b>Pronunciation:</b> ${e.pronunciation}</div>` : ""}
-        ${e.notes ? `<div class="notes"><b>Notes:</b> ${e.notes}</div>` : ""}
+        
+        <!-- This line is updated to always show the label -->
+        <div class="notes"><b>Notes:</b> ${e.notes || ''}</div>
+
         <div class="meta">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"} • ${new Date(e.timestamp).toLocaleString()}</div>
         ${e.audioId ? `<div style="margin-top:8px"><audio controls src="${audioLink}"></audio></div>` : ""}
       `;

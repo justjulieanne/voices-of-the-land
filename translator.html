@@ -2,6 +2,8 @@
   <meta charset="utf-8">
   <title>Voices of the Land — Translator</title>
   <meta name="viewport" content="width=device-width,initial-scale:1" />
+  <!-- 1. Added Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--muted:#6b5847;}
     body{
@@ -88,6 +90,8 @@
       border: 1px solid #e6dcd1;
       padding: 8px;
       font-size: 11px; /* Smaller font for better fit */
+      /* 4. Added position relative for shadow */
+      position: relative; 
     }
     .syllabics-chart th, .reference-list th {
       background-color: var(--card);
@@ -128,6 +132,16 @@
       background-color: #fcfaf7;
     }
 
+    /* --- Added styles for dictionary cards --- */
+    .entry{border-bottom:1px dashed #e7ded4;padding:12px 0}
+    .word{font-size:18px;font-weight:700;color:#3f2b20}
+    .syllabics{font-size:20px;font-weight:500;color:#3f2b20;margin-top:4px;}
+    .meta{font-size:13px;color:#7a6a5f;margin-top:6px}
+    .translation{margin-top:6px; padding-left: 10px;}
+    .notes{margin-top:6px; padding-left: 10px; font-style: italic;}
+    audio{margin-top:8px;width:100%}
+    /* --- End added styles --- */
+
   </style></head><body>
   <div class="wrap">
     <nav class="main-nav">
@@ -149,6 +163,112 @@
     <div id="initialPrompt" style="display: block;">Please enter a search term to see results.</div>
     <div id="noResults">No entries match your search.</div>
     <div id="list"></div> <!-- This is where cards will be added -->
+
+    <!-- Added new script block for the first search bar -->
+    <script>
+    // --- THIS IS YOUR WORKING LINK ---
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw27lNpaPmfAktNrBl3eZgQ-xA2xDkMhiC7-_KCfk9RLKdxAE_y_BBFP-ulPC3oO1zHpg/exec?cmd=listVerified";
+    // --- END LINK ---
+    </script>
+
+    <!-- --- Added script for dictionary loading and searching --- -->
+    <script>
+    // --- NEW SEARCH FUNCTION ---
+    function setupSearch() {
+      const searchBox = document.getElementById('searchBox');
+      const noResultsEl = document.getElementById('noResults');
+      const initialPromptEl = document.getElementById('initialPrompt');
+
+      searchBox.addEventListener('input', () => {
+        const query = searchBox.value.toLowerCase().trim();
+        const entries = document.querySelectorAll('.entry');
+        let visibleCount = 0;
+
+        entries.forEach(entry => {
+          const entryText = entry.textContent.toLowerCase();
+          if (entryText.includes(query)) {
+            entry.style.display = 'block';
+            visibleCount++;
+          } else {
+            entry.style.display = 'none';
+          }
+        });
+
+        // Show or hide the "No results" message
+        if (visibleCount === 0 && query !== '') {
+          noResultsEl.style.display = 'block';
+          initialPromptEl.style.display = 'none';
+        } else if (query === '') {
+          noResultsEl.style.display = 'none';
+          initialPromptEl.style.display = 'block';
+        }
+         else {
+          noResultsEl.style.display = 'none';
+          initialPromptEl.style.display = 'none';
+        }
+      });
+    }
+    // --- END NEW SEARCH FUNCTION ---
+
+
+    async function load() {
+      const container = document.getElementById('list');
+      const initialPromptEl = document.getElementById('initialPrompt');
+      try {
+        container.innerHTML = "Loading..."; // Show loading message
+        initialPromptEl.style.display = 'none'; // Hide initial prompt
+        const resp = await fetch(WEB_APP_URL);
+        if (!resp.ok) { throw new Error(`HTTP error! Status: ${resp.status}`); }
+        const j = await resp.json();
+
+        container.innerHTML = "";
+        if (!j.entries || j.entries.length === 0) {
+          container.innerHTML = "<p>No verified entries yet.</p>";
+          document.getElementById('searchBox').style.display = 'none'; // Hide search if no entries
+          return;
+        }
+
+        j.entries.forEach(e => {
+          const div = document.createElement('div'); div.className = "entry";
+          // Start with entry hidden, search will reveal it
+          div.style.display = 'none'; 
+          const audioLink = `https://drive.google.com/uc?export=download&id=${e.audioId}`;
+
+          // This code now correctly matches the 12-column sheet
+          // I've kept your redundant 'notes' logic exactly as provided
+          div.innerHTML = `
+            <div class="word">${e.indigenousText}</div>
+            ${e.syllabics ? `<div class="syllabics">${e.syllabics}</div>` : ""}
+            <div class="translation"><b>English:</b> ${e.englishText}</div>
+            ${e.frenchText ? `<div class="translation"><b>French:</b> ${e.frenchText}</div>` : ""}
+            ${e.pronunciation ? `<div class="translation"><b>Pronunciation:</b> ${e.pronunciation}</div>` : ""}
+            ${e.notes ? `<div class="notes"><b>Notes:</b> ${e.notes}</div>` : ""}
+            
+            <!-- This line is updated to always show the label -->
+            <div class="notes"><b>Notes:</b> ${e.notes || ''}</div>
+
+            <div class="meta">Community: ${e.community || "Cree"} • Submitted by: ${e.submitter || "Anonymous"} • ${new Date(e.timestamp).toLocaleString()}</div>
+            ${e.audioId ? `<div style="margin-top:8px"><audio controls src="${audioLink}"></audio></div>` : ""}
+          `;
+          container.appendChild(div);
+        });
+
+        // --- NEW ---
+        // After loading all entries, activate the search bar
+        setupSearch();
+        initialPromptEl.style.display = 'block'; // Show prompt now that loading is done
+        // --- END NEW ---
+
+      } catch (err) {
+        console.error("Load Error:", err);
+        container.textContent = "Error loading dictionary: " + err.message;
+        initialPromptEl.style.display = 'none';
+      }
+    }
+    load();
+    </script>
+    <!-- --- End added script --- -->
+
 
     <!-- Syllabics Chart -->
     <div class="syllabics-chart">
@@ -725,7 +845,7 @@
                             <div class="symbol-box">ᓚ</div>
                             <div class="transcription">la</div>
                         </td>
-                        <td class="chart-cell">
+                        <td classs="chart-cell">
                             <div class="symbol-box">ᓛ</div>
                             <div class="transcription">laa</div>
                         </td>
@@ -742,7 +862,7 @@
                         </td>
                         <td class="chart-cell">
                             <div class="symbol-box">ᕕ</div>
-                            <div class="transcription">fi</div>
+                            <div classJ="transcription">fi</div>
                         </td>
                         <td class="chart-cell">
                             <div class="symbol-box">ᕖ</div>
@@ -809,11 +929,12 @@
         </div>
     </div>
 
-    <!-- Added JavaScript for Search Functionality -->
+    <!-- 2. Updated JavaScript for Search Functionality -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('syllabarySearch');
-            const tableBody = document.querySelector('tbody');
+            // 3. Made selector more specific
+            const tableBody = document.querySelector('.syllabics-chart tbody');
             if (!tableBody) return; // Guard clause
             
             const allRows = tableBody.querySelectorAll('tr');
@@ -835,11 +956,11 @@
 
                         if (cellMatches && searchTerm !== '') {
                             rowHasMatch = true;
-                            // Add highlight to matching cell
-                            cell.classList.add('bg-yellow-100');
+                            // 5. Changed highlight classes
+                            cell.classList.add('bg-sky-100', 'shadow-lg');
                         } else {
-                            // Remove highlight from non-matching cell or if search is empty
-                            cell.classList.remove('bg-yellow-100');
+                            // 6. Changed highlight classes
+                            cell.classList.remove('bg-sky-100', 'shadow-lg');
                         }
                     });
 

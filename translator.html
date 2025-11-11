@@ -1,44 +1,158 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Syllabary Chart</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Use Inter font */
-        body {
-            font-family: "Inter", sans-serif;
-        }
-        /* Custom styles for table cells to center content */
-        .chart-cell {
-            border: 1px solid #d1d5db; /* border-gray-300 */
-            padding: 0.5rem; /* p-2 */
-            text-align: center;
-            height: 6rem; /* h-24 */
-            vertical-align: top;
-            min-width: 4rem; /* Add min-width for better spacing */
-        }
-        .symbol-box {
-            font-size: 2.25rem; /* text-4xl */
-            font-weight: 300; /* font-light */
-            height: 3rem; /* h-12 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        .transcription {
-            font-size: 0.875rem; /* text-sm */
-            color: #4b5563; /* text-gray-600 */
-            margin-top: 0.25rem;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 p-4 md:p-8">
-    <div class="max-w-7xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <h1 class="text-2xl font-bold p-6 text-center text-gray-800">Syllabary Chart</h1>
+<!doctype html><html><head>
+  <meta charset="utf-8">
+  <title>Voices of the Land — Translator</title>
+  <meta name="viewport" content="width=device-width,initial-scale:1" />
+  <style>
+    :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--muted:#6b5847;}
+    body{
+      font-family:Inter, Arial, sans-serif;
+      background-color:var(--bg);
+      color:var(--muted);
+      padding:20px;
+      margin:0;
+      /* Medicine Wheel Flower Background */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 10 C20 10 20 20 30 30 C40 20 40 10 30 10' fill='%23FFFFFF' fill-opacity='0.7'/%3E%3Cpath d='M30 50 C20 50 20 40 30 30 C40 40 40 50 30 50' fill='%23B33A2A' fill-opacity='0.5'/%3E%3Cpath d='M10 30 C10 20 20 20 30 30 C20 40 10 40 10 30' fill='%23333333' fill-opacity='0.5'/%3E%3Cpath d='M50 30 C50 20 40 20 30 30 C40 40 50 40 50 30' fill='%23FFD700' fill-opacity='0.5'/%3E%3C/svg%3E");
+    }
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
+      background: rgba(255, 249, 242, 0.98); /* 98% opacity */
+      padding:18px;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.05)
+    }
+    h1, h2, h3 {color:var(--accent);margin:0 0 8px}
+    .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
+    .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
+    .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
+    .main-nav a:hover{background-color:var(--accent-2);}
+    
+    #searchBox {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #e6dcd1;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    /* --- Styles for the prompts --- */
+    #noResults, #initialPrompt {
+      display: none; /* Hidden by default */
+      padding: 15px;
+      font-weight: 600;
+      color: var(--accent);
+      text-align: center;
+    }
+    
+    /* Translator Card Styles */
+    .translator-card {
+      border: 1px solid #e6dcd1;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #fff;
+      display: none; /* Hidden by default for search-first */
+    }
+    .translator-card .lang-block {
+      margin-bottom: 8px;
+    }
+    .translator-card .lang-label {
+      font-weight: 700;
+      color: var(--accent);
+      display: block;
+      font-size: 14px;
+    }
+    .translator-card .lang-text {
+      font-size: 18px;
+      color: #333;
+      padding-left: 10px;
+    }
+    .translator-card .lang-text.syllabics {
+      font-size: 22px;
+    }
+    
+    /* Syllabics Chart Styles */
+    .syllabics-chart, .reference-list {
+      margin-top: 30px;
+      border-top: 2px dashed var(--accent);
+      padding-top: 15px;
+    }
+    .syllabics-chart table, .reference-list table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      table-layout: fixed;
+    }
+    .syllabics-chart th, .syllabics-chart td, .reference-list th, .reference-list td {
+      border: 1px solid #e6dcd1;
+      padding: 8px;
+      font-size: 11px; /* Smaller font for better fit */
+    }
+    .syllabics-chart th, .reference-list th {
+      background-color: var(--card);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .reference-list table {
+      text-align: left;
+    }
+    .reference-list th {
+       width: 25%;
+    }
+    
+    /* Interactive Chart Styles */
+    .syllabics-chart .syllabic-char {
+      font-size: 16px;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      -webkit-user-select: none; /* Prevent text selection on click */
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .syllabics-chart .syllabic-char:hover {
+      background-color: var(--card);
+    }
+    /* --- NEW: Latin reference *inside* the chart --- */
+    .latin-ref {
+      font-size: 11px;
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+    /* --- NEW: Style for non-interactive cells --- */
+    .latin-row td {
+      font-size: 11px;
+      color: var(--muted);
+      background-color: #fcfaf7;
+    }
+
+  </style></head><body>
+  <div class="wrap">
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="submit.html">Submit a Word</a></li>
+        <li><a href="dictionary.html">Public Dictionary</a></li>
+        <li><a href="translator.html">Translator</a></li>
+        <li><a href="admin.html">Admin Review</a></li>
+      </ul>
+    </nav>
+
+    <h1>East (James Bay) Cree Translator</h1>
+    <p class="meta">Search the verified community dictionary. This tool maps all available translations for a single word.</p>
+    
+    <input type="text" id="searchBox" placeholder="Search (English, French, Cree, or Syllabics)...">
+
+    <!-- THIS IS THE FIX: Added the missing initialPrompt div -->
+    <div id="initialPrompt" style="display: block;">Please enter a search term to see results.</div>
+    <div id="noResults">No entries match your search.</div>
+    <div id="list"></div> <!-- This is where cards will be added -->
+
+    <!-- Syllabics Chart -->
+    <div class="syllabics-chart">
+      <h2>East (James Bay) Cree Syllabics Chart (Īyiyū Ayimūn | ᐄᔨᔫ ᐊᔨᒨᓐ)</h2>
         
         <!-- Added Search Bar -->
         <div class="p-4 md:px-6 md:pb-6">

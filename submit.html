@@ -4,21 +4,65 @@
   <meta name="viewport" content="width=device-width,initial-scale:1" />
   <style>
     :root{--bg:#f5efe6; --card:#fff9f2; --accent:#8a4b2a; --accent-2:#b33a2a; --muted:#6b5847;}
-    body{font-family:Inter, Arial, sans-serif;background:var(--bg);color:var(--muted);padding:22px;margin:0;}
-    .wrap{max-width:720px;margin:0 auto;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,0.06);}
+    body{
+      font-family:Inter, Arial, sans-serif;
+      background-color:var(--bg);
+      color:var(--muted);
+      padding:22px;
+      margin:0;
+      /* Medicine Wheel Flower Background */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 10 C20 10 20 20 30 30 C40 20 40 10 30 10' fill='%23FFFFFF' fill-opacity='0.7'/%3E%3Cpath d='M30 50 C20 50 20 40 30 30 C40 40 40 50 30 50' fill='%23B33A2A' fill-opacity='0.5'/%3E%3Cpath d='M10 30 C10 20 20 20 30 30 C20 40 10 40 10 30' fill='%23333333' fill-opacity='0.5'/%3E%3Cpath d='M50 30 C50 20 40 20 30 30 C40 40 50 40 50 30' fill='%23FFD700' fill-opacity='0.5'/%3E%3C/svg%3E");
+    }
+    .wrap{
+      max-width:720px;
+      margin:0 auto;
+      background: rgba(255, 249, 242, 0.98); /* 98% opacity */
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 6px 20px rgba(0,0,0,0.06);
+    }
     h1{color:var(--accent);margin:0 0 6px;font-size:20px}
     label{display:block;margin-top:12px;font-weight:600}
-    input[type=text], textarea, select {width:100%;padding:10px;border:1px solid #e6dcd1;border-radius:8px;margin-top:6px;box-sizing:border-box;}
+    input[type=text], textarea, select {
+      width:100%;
+      padding:10px;
+      border:1px solid #e6dcd1;
+      border-radius:8px;
+      margin-top:6px;
+      box-sizing:border-box; /* Fixes width issue */
+    }
     .controls{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
     button{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:8px;cursor:pointer}
     button.secondary{background:transparent;color:var(--accent);border:1px solid var(--accent)}
     button:disabled{background-color:#ccc;cursor:not-allowed;}
     .muted{color:#7a6a5f;font-size:13px}
     .consent{margin-top:10px;display:flex;align-items:center;gap:8px}
-    .result{margin-top:12px;font-weight:600;padding:10px;border-radius:8px;display:none;}
-    .result.error{color:#721c24;background-color:#f8d7da;border:1px solid #f5c6cb;display:block;}
-    .result.success{color:#155724;background-color:#d4edda;border:1px solid #c3e6cb;display:block;}
-    .result.pending{color:#0c5460;background-color:#d1ecf1;border:1px solid #bee5eb;display:block;}
+    
+    .result{
+      margin-top:12px;
+      font-weight:600;
+      padding:10px;
+      border-radius:8px;
+      display:none; /* Hide by default */
+    }
+    .result.error{
+      color:#721c24;
+      background-color:#f8d7da;
+      border:1px solid #f5c6cb;
+      display:block;
+    }
+    .result.success{
+      color:#155724;
+      background-color:#d4edda;
+      border:1px solid #c3e6cb;
+      display:block;
+    }
+    .result.pending{
+      color:#0c5460;
+      background-color:#d1ecf1;
+      border:1px solid #bee5eb;
+      display:block;
+    }
     
     .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
@@ -33,6 +77,7 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="submit.html">Submit a Word</a></li>
         <li><a href="dictionary.html">Public Dictionary</a></li>
+        <li><a href="translator.html">Translator</a></li>
         <li><a href="admin.html">Admin Review</a></li>
       </ul>
     </nav>
@@ -93,7 +138,6 @@
 
   <script>
     // --- THIS IS YOUR WORKING LINK ---
-    // You must use the link from your most recent, successful deployment
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw27lNpaPmfAktNrBl3eZgQ-xA2xDkMhiC7-_KCfk9RLKdxAE_y_BBFP-ulPC3oO1zHpg/exec";
     // --- END LINK ---
     

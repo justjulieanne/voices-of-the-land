@@ -1,0 +1,354 @@
+<!doctype html><html><head>
+  <meta charset="utf-8">
+  <title>Voices of the Land — Translator</title>
+  <meta name="viewport" content="width=device-width,initial-scale:1" />
+  <style>
+    :root{--bg:#f5efe6;--card:#fff9f2;--accent:#8a4b2a;--muted:#6b5847;}
+    body{
+      font-family:Inter, Arial, sans-serif;
+      background-color:var(--bg);
+      color:var(--muted);
+      padding:20px;
+      margin:0;
+      /* Medicine Wheel Flower Background */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 10 C20 10 20 20 30 30 C40 20 40 10 30 10' fill='%23FFFFFF' fill-opacity='0.7'/%3E%3Cpath d='M30 50 C20 50 20 40 30 30 C40 40 40 50 30 50' fill='%23B33A2A' fill-opacity='0.5'/%3E%3Cpath d='M10 30 C10 20 20 20 30 30 C20 40 10 40 10 30' fill='%23333333' fill-opacity='0.5'/%3E%3Cpath d='M50 30 C50 20 40 20 30 30 C40 40 50 40 50 30' fill='%23FFD700' fill-opacity='0.5'/%3E%3C/svg%3E");
+    }
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
+      background: rgba(255, 249, 242, 0.98); /* 98% opacity */
+      padding:18px;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.05)
+    }
+    h1, h2{color:var(--accent);margin:0 0 8px}
+    .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
+    .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
+    .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
+    .main-nav a:hover{background-color:var(--accent-2);}
+    
+    #searchBox {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #e6dcd1;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    #noResults {
+      display: none;
+      padding: 15px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    
+    /* NEW Translator Card Styles */
+    .translator-card {
+      border: 1px solid #e6dcd1;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .translator-card .lang-block {
+      margin-bottom: 8px;
+    }
+    .translator-card .lang-label {
+      font-weight: 700;
+      color: var(--accent);
+      display: block;
+      font-size: 14px;
+    }
+    .translator-card .lang-text {
+      font-size: 18px;
+      color: #333;
+      padding-left: 10px;
+    }
+    .translator-card .lang-text.syllabics {
+      font-size: 22px;
+    }
+    
+    /* Syllabics Chart Styles */
+    .syllabics-chart {
+      margin-top: 30px;
+      border-top: 2px dashed var(--accent);
+      padding-top: 15px;
+    }
+    .syllabics-chart table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+    }
+    .syllabics-chart th, .syllabics-chart td {
+      border: 1px solid #e6dcd1;
+      padding: 8px;
+      font-size: 14px;
+    }
+    .syllabics-chart th {
+      background-color: var(--card);
+      font-weight: 700;
+    }
+    .syllabics-chart .syllabic-char {
+      font-size: 20px;
+      color: #333;
+    }
+
+  </style></head><body>
+  <div class="wrap">
+    <nav class="main-nav">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="submit.html">Submit a Word</a></li>
+        <li><a href="dictionary.html">Public Dictionary</a></li>
+        <li><a href="translator.html">Translator</a></li>
+        <li><a href="admin.html">Admin Review</a></li>
+      </ul>
+    </nav>
+
+    <h1>Cree Language Translator</h1>
+    <p class="meta">Search the verified community dictionary. This tool maps all available translations for a single word.</p>
+    
+    <input type="text" id="searchBox" placeholder="Search (English, French, Cree, or Syllabics)...">
+
+    <div id="list">Loading dictionary...</div>
+    <div id="noResults">No entries match your search.</div>
+
+    <!-- Syllabics Chart -->
+    <div class="syllabics-chart">
+      <h2>Syllabics Reference Chart</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>-e</th>
+            <th>-ē</th>
+            <th>-i</th>
+            <th>-ī</th>
+            <th>-o</th>
+            <th>-ō</th>
+            <th>-a</th>
+            <th>-ā</th>
+            <th>Final</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>(vowel)</th>
+            <td class="syllabic-char">ᐁ</td>
+            <td class="syllabic-char">ᐁ</td>
+            <td class="syllabic-char">ᐃ</td>
+            <td class="syllabic-char">ᐃ</td>
+            <td class="syllabic-char">ᐅ</td>
+            <td class="syllabic-char">ᐅ</td>
+            <td class="syllabic-char">ᐊ</td>
+            <td class="syllabic-char">ᐊ</td>
+            <td></td>
+          </tr>
+          <tr>
+            <th>p-</th>
+            <td class="syllabic-char">ᐯ</td>
+            <td class="syllabic-char">ᐯ</td>
+            <td class="syllabic-char">ᐱ</td>
+            <td class="syllabic-char">ᐱ</td>
+            <td class="syllabic-char">ᐳ</td>
+            <td class="syllabic-char">ᐳ</td>
+            <td class="syllabic-char">ᐸ</td>
+            <td class="syllabic-char">ᐸ</td>
+            <td class="syllabic-char">ᑊ</td>
+          </tr>
+          <tr>
+            <th>t-</th>
+            <td class="syllabic-char">ᑌ</td>
+            <td class="syllabic-char">ᑌ</td>
+            <td class="syllabic-char">ᑎ</td>
+            <td class="syllabic-char">ᑎ</td>
+            <td class="syllabic-char">ᑐ</td>
+            <td class="syllabic-char">ᑐ</td>
+            <td class="syllabic-char">ᑕ</td>
+            <td class="syllabic-char">ᑕ</td>
+            <td class="syllabic-char">ᐟ</td>
+          </tr>
+          <tr>
+            <th>k-</th>
+            <td class="syllabic-char">ᑫ</td>
+            <td class="syllabic-char">ᑫ</td>
+            <td class="syllabic-char">ᑭ</td>
+            <td class="syllabic-char">ᑭ</td>
+            <td class="syllabic-char">ᑯ</td>
+            <td class="syllabic-char">ᑯ</td>
+            <td class="syllabic-char">ᑲ</td>
+            <td class="syllabic-char">ᑲ</td>
+            <td class="syllabic-char">ᐠ</td>
+          </tr>
+          <tr>
+            <th>ch-</th>
+            <td class="syllabic-char">ᒉ</td>
+            <td class="syllabic-char">ᒉ</td>
+            <td class="syllabic-char">ᒋ</td>
+            <td class="syllabic-char">ᒋ</td>
+            <td class="syllabic-char">ᒍ</td>
+            <td class="syllabic-char">ᒍ</td>
+            <td class="syllabic-char">ᒐ</td>
+            <td class="syllabic-char">ᒐ</td>
+            <td class="syllabic-char">ᐨ</td>
+          </tr>
+          <tr>
+            <th>m-</th>
+            <td class="syllabic-char">ᒣ</td>
+            <td class="syllabic-char">ᒣ</td>
+            <td class="syllabic-char">ᒥ</td>
+            <td class="syllabic-char">ᒥ</td>
+            <td class="syllabic-char">ᒧ</td>
+            <td class="syllabic-char">ᒧ</td>
+            <td class="syllabic-char">ᒪ</td>
+            <td class="syllabic-char">ᒪ</td>
+            <td class="syllabic-char">ᒼ</td>
+          </tr>
+          <tr>
+            <th>n-</th>
+            <td class="syllabic-char">ᓀ</td>
+            <td class="syllabic-char">ᓀ</td>
+            <td class="syllabic-char">ᓂ</td>
+            <td class="syllabic-char">ᓂ</td>
+            <td class="syllabic-char">ᓄ</td>
+            <td class="syllabic-char">ᓄ</td>
+            <td class="syllabic-char">ᓇ</td>
+            <td class="syllabic-char">ᓇ</td>
+            <td class="syllabic-char">ᐣ</td>
+          </tr>
+          <tr>
+            <th>s-</th>
+            <td class="syllabic-char">ᓭ</td>
+            <td class="syllabic-char">ᓭ</td>
+            <td class="syllabic-char">ᓯ</td>
+            <td class="syllabic-char">ᓯ</td>
+            <td class="syllabic-char">ᓱ</td>
+            <td class="syllabic-char">ᓱ</td>
+            <td class="syllabic-char">ᓴ</td>
+            <td class="syllabic-char">ᓴ</td>
+            <td class="syllabic-char">ᐢ</td>
+          </tr>
+          <tr>
+            <th>y-</th>
+            <td class="syllabic-char">ᔦ</td>
+            <td class="syllabic-char">ᔦ</td>
+            <td class="syllabic-char">ᔨ</td>
+            <td class="syllabic-char">ᔨ</td>
+            <td class="syllabic-char">ᔪ</td>
+            <td class="syllabic-char">ᔪ</td>
+            <td class="syllabic-char">ᔭ</td>
+            <td class="syllabic-char">ᔭ</td>
+            <td class="syllabic-char">ᐧ</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><script>
+    // --- THIS IS YOUR WORKING LINK ---
+    // You must use the link from your most recent, successful deployment
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw27lNpaPmfAktNrBl3eZgQ-xA2xDkMhiC7-_KCfk9RLKdxAE_y_BBFP-ulPC3oO1zHpg/exec?cmd=listVerified";
+    // --- END LINK ---
+
+// --- SEARCH FUNCTION ---
+function setupSearch(entries) {
+  const searchBox = document.getElementById('searchBox');
+  const noResultsEl = document.getElementById('noResults');
+  const container = document.getElementById('list');
+  
+  searchBox.addEventListener('input', () => {
+    const query = searchBox.value.toLowerCase().trim();
+    let visibleCount = 0;
+    
+    // Clear the list
+    container.innerHTML = "";
+
+    // Filter and build new cards
+    const filteredEntries = entries.filter(e => {
+        return (e.indigenousText && e.indigenousText.toLowerCase().includes(query)) ||
+               (e.syllabics && e.syllabics.toLowerCase().includes(query)) ||
+               (e.englishText && e.englishText.toLowerCase().includes(query)) ||
+               (e.frenchText && e.frenchText.toLowerCase().includes(query)) ||
+               (e.pronunciation && e.pronunciation.toLowerCase().includes(query));
+    });
+
+    filteredEntries.forEach(e => {
+        const div = createEntryCard(e);
+        container.appendChild(div);
+        visibleCount++;
+    });
+
+    // Show or hide the "No results" message
+    if (visibleCount === 0 && entries.length > 0) {
+      noResultsEl.style.display = 'block';
+    } else {
+      noResultsEl.style.display = 'none';
+    }
+  });
+}
+// --- END SEARCH FUNCTION ---
+
+// --- NEW Card Builder ---
+function createEntryCard(e) {
+  const div = document.createElement('div');
+  div.className = "translator-card";
+  
+  // Build the card HTML
+  div.innerHTML = `
+    <div class="lang-block">
+      <span class="lang-label">Cree (Roman):</span>
+      <span class="lang-text">${e.indigenousText || '...'}</span>
+    </div>
+    <div class="lang-block">
+      <span class="lang-label">Syllabics:</span>
+      <span class="lang-text syllabics">${e.syllabics || '...'}</span>
+    </div>
+    <div class="lang-block">
+      <span class="lang-label">English:</span>
+      <span class="lang-text">${e.englishText || '...'}</span>
+    </div>
+    <div class="lang-block">
+      <span class="lang-label">French:</span>
+      <span class="lang-text">${e.frenchText || '...'}</span>
+    </div>
+    <div class="lang-block">
+      <span class="lang-label">Pronunciation:</span>
+      <span class="lang-text">${e.pronunciation || '...'}</span>
+    </div>
+  `;
+  return div;
+}
+
+async function load() {
+  const container = document.getElementById('list');
+  try {
+    const resp = await fetch(WEB_APP_URL);
+    if (!resp.ok) { throw new Error(`HTTP error! Status: ${resp.status}`); }
+    const j = await resp.json();
+    
+    container.innerHTML = "";
+    if (!j.entries || j.entries.length === 0) {
+      container.innerHTML = "<p>No verified entries yet.</p>";
+      document.getElementById('searchBox').style.display = 'none'; // Hide search if no entries
+      return;
+    }
+    
+    // Store entries for searching
+    const allEntries = j.entries;
+    
+    // Display all entries by default on first load
+    allEntries.forEach(e => {
+      const div = createEntryCard(e);
+      container.appendChild(div);
+    });
+
+    // Activate the search bar
+    setupSearch(allEntries);
+
+  } catch (err) {
+    console.error("Load Error:", err);
+    container.textContent = "Error loading dictionary: " + err.message;
+  }
+}
+load();</script></body></html>

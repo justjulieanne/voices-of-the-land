@@ -235,7 +235,38 @@
       } finally {
         submitBtn.disabled = false;
       }
-  <!-- Syllabics Chart -->
+ /* Syllabics Chart Styles */
+    .syllabics-chart, .reference-list {
+      margin-top: 30px;
+      border-top: 2px dashed var(--accent);
+      padding-top: 15px;
+    }
+    .syllabics-chart table, .reference-list table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: center;
+      table-layout: fixed;
+    }
+    .syllabics-chart th, .syllabics-chart td, .reference-list th, .reference-list td {
+      border: 1px solid #e6dcd1;
+      padding: 8px;
+      font-size: 11px; /* Smaller font for better fit */
+      /* 4. Added position relative for shadow */
+      position: relative; 
+    }
+    .syllabics-chart th, .reference-list th {
+      background-color: var(--card);
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .reference-list table {
+      text-align: left;
+    }
+    .reference-list th {
+       width: 25%;
+    }
+    
+      <!-- Syllabics Chart -->
     <div class="syllabics-chart">
       <h2>East (James Bay) Cree Syllabics Chart (Īyiyū Ayimūn | ᐄᔨᔫ ᐊᔨᒨᓐ)</h2>
         

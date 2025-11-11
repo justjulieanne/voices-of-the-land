@@ -21,7 +21,7 @@
       border-radius:12px;
       box-shadow:0 6px 18px rgba(0,0,0,0.05)
     }
-    h1, h2{color:var(--accent);margin:0 0 8px}
+    h1, h2, h3 {color:var(--accent);margin:0 0 8px}
     .main-nav{background-color:var(--accent);border-radius:8px;margin-bottom:20px;overflow:hidden;}
     .main-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;}
     .main-nav a{display:block;padding:12px 18px;text-decoration:none;color:white;font-weight:600;font-size:15px;}
@@ -36,6 +36,7 @@
       font-size: 16px;
       box-sizing: border-box;
     }
+    /* --- Styles for the prompts --- */
     #noResults, #initialPrompt {
       display: none; /* Hidden by default */
       padding: 15px;
@@ -72,36 +73,59 @@
     }
     
     /* Syllabics Chart Styles */
-    .syllabics-chart {
+    .syllabics-chart, .reference-list {
       margin-top: 30px;
       border-top: 2px dashed var(--accent);
       padding-top: 15px;
     }
-    .syllabics-chart table {
+    .syllabics-chart table, .reference-list table {
       width: 100%;
       border-collapse: collapse;
       text-align: center;
       table-layout: fixed;
     }
-    .syllabics-chart th, .syllabics-chart td {
+    .syllabics-chart th, .syllabics-chart td, .reference-list th, .reference-list td {
       border: 1px solid #e6dcd1;
       padding: 8px;
-      font-size: 12px;
+      font-size: 11px; /* Smaller font for better fit */
     }
-    .syllabics-chart th {
+    .syllabics-chart th, .reference-list th {
       background-color: var(--card);
       font-weight: 700;
+      font-size: 12px;
+    }
+    .reference-list table {
+      text-align: left;
+    }
+    .reference-list th {
+       width: 25%;
     }
     
     /* Interactive Chart Styles */
     .syllabics-chart .syllabic-char {
-      font-size: 18px;
+      font-size: 16px;
       color: #333;
       cursor: pointer;
       transition: background-color 0.2s;
+      -webkit-user-select: none; /* Prevent text selection on click */
+      -ms-user-select: none;
+      user-select: none;
     }
     .syllabics-chart .syllabic-char:hover {
       background-color: var(--card);
+    }
+    /* --- NEW: Latin reference *inside* the chart --- */
+    .latin-ref {
+      font-size: 11px;
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+    /* --- NEW: Style for non-interactive cells --- */
+    .latin-row td {
+      font-size: 11px;
+      color: var(--muted);
+      background-color: #fcfaf7;
     }
 
   </style></head><body>
@@ -116,7 +140,7 @@
       </ul>
     </nav>
 
-    <h1>Cree Language Translator</h1>
+    <h1>East (James Bay) Cree Translator</h1>
     <p class="meta">Search the verified community dictionary. This tool maps all available translations for a single word.</p>
     
     <input type="text" id="searchBox" placeholder="Search (English, French, Cree, or Syllabics)...">
@@ -128,24 +152,23 @@
 
     <!-- Syllabics Chart -->
     <div class="syllabics-chart">
-      <h2>Swampy Cree Syllabics Chart</h2>
+      <h2>East (James Bay) Cree Syllabics (Īyiyū Ayimūn)</h2>
+      <!-- This is the new 36-row chart, transcribed from your images, with the first column removed -->
       <table>
         <thead>
           <tr>
-            <th></th>
-            <th>-ē</th>
+            <th>-e</th>
             <th>-i</th>
-            <th>-ī</th>
-            <th>-o</th>
-            <th>-ō</th>
+            <th>-ii/î</th>
+            <th>-u</th>
+            <th>-uu/û</th>
             <th>-a</th>
-            <th>-ā</th>
+            <th>-aa/â</th>
             <th>Final</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <th>(vowel)</th>
             <td class="syllabic-char">ᐁ</td>
             <td class="syllabic-char">ᐃ</td>
             <td class="syllabic-char">ᐄ</td>
@@ -155,19 +178,57 @@
             <td class="syllabic-char">ᐋ</td>
             <td></td>
           </tr>
-          <tr>
-            <th>w-</th>
-            <td class="syllabic-char">ᐍ</td>
-            <td class="syllabic-char">ᐏ</td>
-            <td class="syllabic-char">ᐑ</td>
-            <td class="syllabic-char">ᐓ</td>
-            <td class="syllabic-char">ᐕ</td>
-            <td class="syllabic-char">ᐘ</td>
-            <td class="syllabic-char">ᐚ</td>
-            <td class="syllabic-char">ᐤ</td>
+          <tr class="latin-row">
+            <td>e</td>
+            <td>i</td>
+            <td>ii/î</td>
+            <td>u</td>
+            <td>uu/û</td>
+            <td>a</td>
+            <td>aa/â</td>
+            <td></td>
           </tr>
           <tr>
-            <th>p-</th>
+            <td class="syllabic-char">ᐌ</td>
+            <td class="syllabic-char">ᐎ</td>
+            <td class="syllabic-char">ᐐ</td>
+            <td class="syllabic-char">ᐒ</td>
+            <td class="syllabic-char">ᐔ</td>
+            <td class="syllabic-char">ᐗ</td>
+            <td class="syllabic-char">ᐙ</td>
+            <td class="syllabic-char">ᐤ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>we</td>
+            <td>wi</td>
+            <td>wii</td>
+            <td>wu</td>
+            <td>wuu</td>
+            <td>wa</td>
+            <td>waa</td>
+            <td>w</td>
+          </tr>
+          <tr>
+            <td class="syllabic-char">ᐦᐁ</td>
+            <td class="syllabic-char">ᐦᐃ</td>
+            <td class="syllabic-char">ᐦᐄ</td>
+            <td class="syllabic-char">ᐦᐅ</td>
+            <td class="syllabic-char">ᐦᐆ</td>
+            <td class="syllabic-char">ᐦᐊ</td>
+            <td class="syllabic-char">ᐦᐋ</td>
+            <td class="syllabic-char">ᐦ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>he</td>
+            <td>hi</td>
+            <td>hii</td>
+            <td>hu</td>
+            <td>huu</td>
+            <td>ha</td>
+            <td>haa</td>
+            <td>h</td>
+          </tr>
+          <tr>
             <td class="syllabic-char">ᐯ</td>
             <td class="syllabic-char">ᐱ</td>
             <td class="syllabic-char">ᐲ</td>
@@ -175,10 +236,19 @@
             <td class="syllabic-char">ᐴ</td>
             <td class="syllabic-char">ᐸ</td>
             <td class="syllabic-char">ᐹ</td>
-            <td class="syllabic-char">ᑊ</td>
+            <td class="syllabic-char">ᑉ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>pe</td>
+            <td>pi</td>
+            <td>pii</td>
+            <td>pu</td>
+            <td>puu</td>
+            <td>pa</td>
+            <td>paa</td>
+            <td>p</td>
           </tr>
           <tr>
-            <th>t-</th>
             <td class="syllabic-char">ᑌ</td>
             <td class="syllabic-char">ᑎ</td>
             <td class="syllabic-char">ᑏ</td>
@@ -186,10 +256,19 @@
             <td class="syllabic-char">ᑑ</td>
             <td class="syllabic-char">ᑕ</td>
             <td class="syllabic-char">ᑖ</td>
-            <td class="syllabic-char">ᐟ</td>
+            <td class="syllabic-char">ᑦ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>te</td>
+            <td>ti</td>
+            <td>tii</td>
+            <td>tu</td>
+            <td>tuu</td>
+            <td>ta</td>
+            <td>taa</td>
+            <td>t</td>
           </tr>
           <tr>
-            <th>k-</th>
             <td class="syllabic-char">ᑫ</td>
             <td class="syllabic-char">ᑭ</td>
             <td class="syllabic-char">ᑮ</td>
@@ -197,10 +276,39 @@
             <td class="syllabic-char">ᑰ</td>
             <td class="syllabic-char">ᑲ</td>
             <td class="syllabic-char">ᑳ</td>
-            <td class="syllabic-char">ᐠ</td>
+            <td class="syllabic-char">ᒃ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>ke</td>
+            <td>ki</td>
+            <td>kii</td>
+            <td>ku</td>
+            <td>kuu</td>
+            <td>ka</td>
+            <td>kaa</td>
+            <td>k</td>
           </tr>
           <tr>
-            <th>c-</th>
+            <td class="syllabic-char">ᑴ</td>
+            <td class="syllabic-char">ᑶ</td>
+            <td class="syllabic-char">ᑸ</td>
+            <td class="syllabic-char">ᑺ</td>
+            <td class="syllabic-char">ᑼ</td>
+            <td class="syllabic-char">ᑾ</td>
+            <td class="syllabic-char">ᒀ</td>
+            <td class="syllabic-char">ᒄ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>kwe</td>
+            <td>kwi</td>
+            <td>kwii</td>
+            <td>kwu</td>
+            <td>kwuu</td>
+            <td>kwa</td>
+            <td>kwaa</td>
+            <td>kw</td>
+          </tr>
+          <tr>
             <td class="syllabic-char">ᒉ</td>
             <td class="syllabic-char">ᒋ</td>
             <td class="syllabic-char">ᒌ</td>
@@ -208,11 +316,76 @@
             <td class="syllabic-char">ᒎ</td>
             <td class="syllabic-char">ᒐ</td>
             <td class="syllabic-char">ᒑ</td>
-            <td class="syllabic-char">ᐨ</td>
+            <td class="syllabic-char">ᒡ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>che</td>
+            <td>chi</td>
+            <td>chii</td>
+            <td>chu</td>
+            <td>chuu</td>
+            <td>cha</td>
+            <td>chaa</td>
+            <td>ch</td>
           </tr>
           <tr>
-            <th>m-</th>
             <td class="syllabic-char">ᒣ</td>
             <td class="syllabic-char">ᒥ</td>
             <td class="syllabic-char">ᒦ</td>
-            <td class.
+            <td class="syllabic-char">ᒧ</td>
+            <td class="syllabic-char">ᒨ</td>
+            <td class="syllabic-char">ᒪ</td>
+            <td class="syllabic-char">ᒫ</td>
+            <td class="syllabic-char">ᒻ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>me</td>
+            <td>mi</td>
+            <td>mii</td>
+            <td>mu</td>
+            <td>muu</td>
+            <td>ma</td>
+            <td>maa</td>
+            <td>m</td>
+          </tr>
+          <tr>
+            <td class="syllabic-char">ᒬ</td>
+            <td class="syllabic-char">ᒮ</td>
+            <td class="syllabic-char">ᒰ</td>
+            <td class="syllabic-char">ᒲ</td>
+            <td class="syllabic-char">ᒴ</td>
+            <td class="syllabic-char">ᒶ</td>
+            <td class="syllabic-char">ᒸ</td>
+            <td class="syllabic-char">ᒽ</td>
+          </tr>
+          <tr class="latin-row">
+            <td>mwe</td>
+            <td>mwi</td>
+            <td>mwii</td>
+            <td>mwu</td>
+            <td>mwuu</td>
+            <td>mwa</td>
+            <td>mwaa</td>
+            <td>mw</td>
+          </tr>
+          <tr>
+            <td class="syllabic-char">ᓀ</td>
+            <td class="syllabic-char">ᓂ</td>
+            <td class="syllabic-char">ᓃ</td>
+            <td class="syllabic-char">ᓄ</td>
+            <td class="syllabic-char">ᓅ</td>
+            <td class="syllabic-char">ᓇ</td>
+            <td class="syllabic-char">ᓈ</td>
+            <td class_allEntries = j.entries;
+    
+    // Activate the search bar and interactivity
+    setupSearch(allEntries);
+    setupChartInteractivity();
+
+  } catch (err) {
+    console.error("Load Error:", err);
+    container.textContent = "Error loading dictionary: " + err.message;
+  }
+}
+load();
+</script></body></html>
